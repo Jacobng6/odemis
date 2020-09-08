@@ -20,7 +20,7 @@ Odemis is distributed in the hope that it will be useful, but WITHOUT ANY WARRAN
 You should have received a copy of the GNU General Public License along with Odemis. If not, see http:#www.gnu.org/licenses/.
 """
 
-# Make sure the driver is updated in the Python packages
+# Make sure the picoquant driver is updated in the Python odemis package
 # sudo cp src/odemis/driver/picoquant400.py /usr/local/lib/python3.6/dist-packages/odemis/driver
 
 from __future__ import division
@@ -447,7 +447,6 @@ class HH400(model.Detector):
         # Sync signal settings
         self.syncDiv = model.IntEnumerated(
             1, choices={1, 2, 4, 8, 16}, unit="", setter=self._setSyncDiv
-
         )
         self._setSyncDiv(self.syncDiv.value)
 
