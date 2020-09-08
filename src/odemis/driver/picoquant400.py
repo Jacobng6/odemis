@@ -20,6 +20,9 @@ Odemis is distributed in the hope that it will be useful, but WITHOUT ANY WARRAN
 You should have received a copy of the GNU General Public License along with Odemis. If not, see http:#www.gnu.org/licenses/.
 """
 
+# Make sure the driver is updated in the Python packages
+# sudo cp picoquant400.py /usr/local/lib/python3.6/dist-packages/odemis/driver
+
 from __future__ import division
 
 from concurrent import futures
