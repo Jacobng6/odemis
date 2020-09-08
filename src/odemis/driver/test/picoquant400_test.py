@@ -21,10 +21,9 @@ Odemis. If not, see http://www.gnu.org/licenses/.
 odemis/driver/test/picoquant_test.py, you can duplicate the TestPH300
 (and other code) to create a test for the HH400. You can then run it
 from either PyCharm, or from the terminal with:
-python3 src/odemis/driver/test/picoquant_test.py --verbose TestHH400
+python3 src/odemis/driver/test/picoquant400_test.py --verbose TestHH400
 And with the simulator:
-TEST_NOHW=1 python3 src/odemis/driver/test/picoquant_test.py --verbose
-TestHH400
+TEST_NOHW=1 python3 src/odemis/driver/test/picoquant400_test.py --verbose TestHH400
 '''
 
 import copy
@@ -144,8 +143,8 @@ class TestHH400(unittest.TestCase):
             self.assertGreaterEqual(pxd, pxdr)
 
             so = -10e-9 * i
-            self.dev.syncOffset.value = so
-            self.assertAlmostEqual(self.dev.syncOffset.value, so)
+            self.dev.syncChannelOffset.value = so
+            self.assertAlmostEqual(self.dev.syncChannelOffset.value, so)
 
             data = df.get()
             self.assertEqual(data.metadata[model.MD_DWELL_TIME], dt)

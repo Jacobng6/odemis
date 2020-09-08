@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with Ode
 """
 
 # Make sure the driver is updated in the Python packages
-# sudo cp picoquant400.py /usr/local/lib/python3.6/dist-packages/odemis/driver
+# sudo cp src/odemis/driver/picoquant400.py /usr/local/lib/python3.6/dist-packages/odemis/driver
 
 from __future__ import division
 
@@ -780,7 +780,7 @@ class HH400(model.Detector):
         return actuallen.value
 
     @autoretry
-    def ClearHistMem(self, block=0):
+    def ClearHistMem(self, block):
         """
         block (0 <= int): block number to clear
         """
@@ -852,7 +852,7 @@ class HH400(model.Detector):
         """
         # TODO JN
         clear_int = 1 if clear else 0
-        buf = numpy.empty((1, self.actuallen), dtype=numpy.uint32)
+        buf = numpy.empty((1, self._actuallen), dtype=numpy.uint32)
         buf_ct = buf.ctypes.data_as(POINTER(c_uint32))
         self._dll.HH_GetHistogram(self._idx, buf_ct, channel, clear_int)
         return buf
@@ -1227,7 +1227,7 @@ class HH400(model.Detector):
                         break
 
                     logging.debug("Starting new acquisition")
-                    self.ClearHistMem()
+                    self.ClearHistMem(0)
                     self.StartMeas(int(tacq * 1e3))
 
                     # Wait for the acquisition to be done or until a stop or
@@ -1441,7 +1441,7 @@ class FakeHHDLL(object):
     # These functions work independent from any device.
 
     def HH_GetErrorString(self, errstring, errcode):
-        errstring.value = "Fake error string"
+        errstring.value = b"Fake error string"
 
     def HH_GetLibraryVersion(self, ver_str):
         ver_str.value = b"3.00"
@@ -1500,7 +1500,7 @@ class FakeHHDLL(object):
         pass
 
     def HH_GetHardwareDebugInfo(self, i, debuginfo):
-        debuginfo.value = "Fake hardware debug info"
+        debuginfo.value = b"Fake hardware debug info"
         # Not needed?
 
     def HH_Calibrate(self, i):
@@ -1542,7 +1542,7 @@ class FakeHHDLL(object):
         actuallen = _deref(p_actuallen, c_int)
         actuallen.value = MAXHISTLEN
 
-    def HH_ClearHistMem(self, i):
+    def HH_ClearHistMem(self, i, block):
         self._last_acq_dur = None
 
     def HH_SetMeasControl(self, i, meascontrol, startedge, stopedge):
@@ -1600,7 +1600,8 @@ class FakeHHDLL(object):
         rate = _deref(p_rate, c_int)
         rate.value = random.randint(0, 5000)
 
-    def HH_GetFlags(self, i, flags):
+    def HH_GetFlags(self, i, p_flags):
+        flags = _deref(p_flags, c_int)
         flags.value = 1
 
     def HH_GetElapsedMeasTime(self, i, p_elapsed):
@@ -1610,11 +1611,12 @@ class FakeHHDLL(object):
         else:
             elapsed.value = min(self._acq_end, time.time()) - self._acq_start
 
-    def HH_GetWarnings(self, i, warnings):
+    def HH_GetWarnings(self, i, p_warnings):
+        warnings = _deref(p_warnings, c_int)
         warnings.value = 1
 
     def HH_GetWarningsText(self, i, text, warnings):
-        text.value = "Fake warning text"
+        text.value = b"Fake warning text"
 
     def HH_GetSyncPeriod(self, i, p_period):
         period = _deref(p_period, c_double)
