@@ -136,6 +136,8 @@ class HHDLL(CDLL):
         try:
             # Global so that its sub-libraries can access it
             CDLL.__init__(self, "libhh400.so", RTLD_GLOBAL)
+            # libhh400.so
+            # hhlib.so
         except OSError:
             logging.error("Check that PicoQuant HHLib is correctly installed")
             raise
@@ -450,7 +452,8 @@ class HH400(model.Detector):
         )
         self._setSyncDiv(self.syncDiv.value)
 
-        self.SetSyncCFD(int(sync_level * 1000), int(sync_zc * 1000))
+        if (sync_level != None) and (sync_zc != None):
+            self.SetSyncCFD(int(sync_level * 1000), int(sync_zc * 1000))
 
         self.syncChannelOffset = model.FloatContinuous(
             0,

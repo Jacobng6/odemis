@@ -27,7 +27,7 @@ from odemis.driver import picoquant, simulated
 import os
 import time
 import unittest
-from odemis.driver import actuator, tmcm
+from odemis.driver import actuator # tmcm
 
 logging.getLogger().setLevel(logging.DEBUG)
 
