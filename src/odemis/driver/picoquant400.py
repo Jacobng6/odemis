@@ -152,6 +152,8 @@ class HHDLL(CDLL):
         if result != 0:
             err_str = create_string_buffer(40)
             self.HH_GetErrorString(err_str, result)
+            # Wrong to use self._dll.HH_Get...
+            # Because self is already initialized with CDLL within this class?
             if result in HHDLL.err_code:
                 raise HHError(
                     result,
@@ -1207,10 +1209,13 @@ class HH400(model.Detector):
                 # Check for warnings after getting count rates
                 warnings = self.GetWarnings()
                 if warnings != 0:
-                    print(self.GetWarningsText(warnings))
+                    logging.warning(self.GetWarningsText(warnings))
 
                 # Stop measurement if any bin fills up
                 self.SetStopOverflow(True, STOPCNTMAX)
+                # TODO JN: Odemis waits a while to keep acquiring even after overflow
+                # Check for overflow at the end and log debug message. 
+                # Log at warming level, or generate special data for indicate something went wrong
 
                 # Keep acquiring
                 while True:
@@ -1314,6 +1319,7 @@ class HH400RawDetector(model.Detector):
 
         self._shape = (2 ** 31,)  # only one point, with (32 bits) int size
         self.data = BasicDataFlow(self)
+        # TODO JN: Separate DataFlow for multiple channels?
 
         self._metadata[model.MD_DET_TYPE] = model.MD_DT_NORMAL
         self._generator = None
