@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with Ode
 """
 
 # Make sure the picoquant driver is updated in the Python odemis package
-# sudo cp src/odemis/driver/picoquant400.py /usr/local/lib/python3.6/dist-packages/odemis/driver
+# sudo cp src/odemis/driver/picoquant400.py /usr/lib/python3/dist-packages/odemis/driver
 
 from __future__ import division
 
@@ -136,8 +136,6 @@ class HHDLL(CDLL):
         try:
             # Global so that its sub-libraries can access it
             CDLL.__init__(self, "libhh400.so", RTLD_GLOBAL)
-            # libhh400.so
-            # hhlib.so
         except OSError:
             logging.error("Check that PicoQuant HHLib is correctly installed")
             raise
@@ -153,7 +151,7 @@ class HHDLL(CDLL):
         # everything returns 0 on correct usage, and < 0 on error
         if result != 0:
             err_str = create_string_buffer(40)
-            self._dll.HH_GetErrorString(err_str, result)
+            self.HH_GetErrorString(err_str, result)
             if result in HHDLL.err_code:
                 raise HHError(
                     result,
