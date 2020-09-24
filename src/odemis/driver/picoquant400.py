@@ -20,8 +20,8 @@ Odemis is distributed in the hope that it will be useful, but WITHOUT ANY WARRAN
 You should have received a copy of the GNU General Public License along with Odemis. If not, see http:#www.gnu.org/licenses/.
 """
 
-# Make sure the picoquant driver is updated in the Python odemis package
-# sudo cp src/odemis/driver/picoquant400.py /usr/lib/python3/dist-packages/odemis/driver
+# Adjust the PYTHONPATH for testing
+# export PYTHONPATH=~/development/odemis-hydraharp/src/
 
 from __future__ import division
 
@@ -336,9 +336,9 @@ class HH400(model.Detector):
         self._hw_access = threading.Lock()
 
         if disc_volt is None:
-            disc_volt = [0, 0, 0, 0, 0, 0, 0, 0]
+            disc_volt = [0, 0]
         if zero_cross is None:
-            zero_cross = [0, 0, 0, 0, 0, 0, 0, 0]
+            zero_cross = [0, 0]
 
         super(HH400, self).__init__(
             name, role, daemon=daemon, dependencies=dependencies, **kwargs
@@ -421,6 +421,11 @@ class HH400(model.Detector):
         # self.SetInputChannelEnable(channel, bool)
 
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
+            logging.debug(
+                "Channel: %d, discriminator voltage: %d, zero crossing: %d" % (i,
+                    int(dv * 1000), int(zc * 1000))
+            )
+
             self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
 
             self.inputChannelOffset = model.FloatContinuous(
@@ -896,6 +901,7 @@ class HH400(model.Detector):
             self._dll.HH_GetCountRate(self._idx, channel, byref(cntrate))
         return cntrate.value
 
+    @autoretry
     def GetFlags(self):
         """
         Use the predefined bit mask values in hhdefin.h (e.g. FLAG_OVERFLOW) to extract individual bits through a bitwise AND.
@@ -1214,7 +1220,7 @@ class HH400(model.Detector):
                 # Stop measurement if any bin fills up
                 self.SetStopOverflow(True, STOPCNTMAX)
                 # TODO JN: Odemis waits a while to keep acquiring even after overflow
-                # Check for overflow at the end and log debug message. 
+                # Check for overflow at the end and log debug message.
                 # Log at warming level, or generate special data for indicate something went wrong
 
                 # Keep acquiring
@@ -1264,10 +1270,6 @@ class HH400(model.Detector):
                 logging.debug("Acquisition stopped")
                 self._toggle_shutters(self._shutters.keys(), False)
 
-                flags = self.GetFlags()
-                if flags & FLAG_OVERFLOW > 0:
-                    logging.debug("Overflow")
-
         except TerminationRequested:
             logging.debug("Acquisition thread requested to terminate")
         except Exception:
@@ -1276,6 +1278,10 @@ class HH400(model.Detector):
             logging.error("Acquisition thread ended without exception")
         finally:
             self._toggle_shutters(self._shutters.keys(), False)
+
+        flags = self.GetFlags()
+        if flags & FLAG_OVERFLOW > 0:
+            logging.warning("Overflow")
 
         logging.debug("Acquisition thread ended")
 
