@@ -102,9 +102,7 @@ class PHDLL(CDLL):
         # TODO: also support loading the Windows DLL on Windows
         try:
             # Global so that its sub-libraries can access it
-            CDLL.__init__(self, "phlib.so", RTLD_GLOBAL)
-            # libph300.so
-            # phlib.so
+            CDLL.__init__(self, "libph300.so", RTLD_GLOBAL)
         except OSError:
             logging.error("Check that PicoQuant PHLib is correctly installed")
             raise
