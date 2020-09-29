@@ -335,12 +335,12 @@ class HH400(model.Detector):
 
         if disc_volt is None:
             disc_volt = []
-            for i in children.items()
+            for i in children.items():
                 disc_volt.append(0)
             # disc_volt = [0, 0]
         if zero_cross is None:
             zero_cross = []
-            for i in children.items()
+            for i in children.items():
                 zero_cross.append(0)
             # zero_cross = [0, 0]
 
