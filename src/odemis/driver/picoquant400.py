@@ -21,7 +21,7 @@ You should have received a copy of the GNU General Public License along with Ode
 """
 
 # Adjust the PYTHONPATH for testing
-# export PYTHONPATH=~/development/odemis-hydraharp/src/
+# export PYTHONPATH=~/development/odemis_hydraharp/src/
 
 from __future__ import division
 
@@ -334,9 +334,15 @@ class HH400(model.Detector):
         self._hw_access = threading.Lock()
 
         if disc_volt is None:
-            disc_volt = [0, 0]
+            disc_volt = []
+            for i in children.items()
+                disc_volt.append(0)
+            # disc_volt = [0, 0]
         if zero_cross is None:
-            zero_cross = [0, 0]
+            zero_cross = []
+            for i in children.items()
+                zero_cross.append(0)
+            # zero_cross = [0, 0]
 
         super(HH400, self).__init__(
             name, role, daemon=daemon, dependencies=dependencies, **kwargs
@@ -419,11 +425,6 @@ class HH400(model.Detector):
         # self.SetInputChannelEnable(channel, bool)
 
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
-            logging.debug(
-                "Channel: %d, discriminator voltage: %d, zero crossing: %d" % (i,
-                    int(dv * 1000), int(zc * 1000))
-            )
-
             self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
 
             self.inputChannelOffset = model.FloatContinuous(
