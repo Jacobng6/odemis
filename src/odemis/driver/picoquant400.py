@@ -153,7 +153,7 @@ class HHDLL(CDLL):
         # everything returns 0 on correct usage, and < 0 on error
         if result != 0:
             err_str = create_string_buffer(40)
-            self._dll.HH_GetErrorString(err_str, result)
+            self.HH_GetErrorString(err_str, result)
             if result in HHDLL.err_code:
                 raise HHError(
                     result,
@@ -492,6 +492,7 @@ class HH400(model.Detector):
         sn_str = create_string_buffer(8)
         for i in range(MAXDEVNUM):
             try:
+                logging.debug("Trying to open device %d using dll %s", i, self._dll)
                 self._dll.HH_OpenDevice(i, sn_str)
             except HHError as ex:
                 if ex.errno == -1:  # ERROR_DEVICE_OPEN_FAIL == no device with this idx
