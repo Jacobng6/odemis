@@ -306,7 +306,7 @@ class HH400(model.Detector):
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector7 are valid)
 
-        # TODO JN: We're using a superconducting nanowire SPD, not an APD?
+        # TODO JN: Treat the sync signal as a child (detector)?
         sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (in V)
         sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (in V)
         disc_volt (8 (0 <= float <= 1.0)): discriminator voltage for the APD 0 through 8 (in V)
