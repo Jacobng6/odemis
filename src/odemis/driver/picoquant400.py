@@ -302,15 +302,15 @@ class HH400(model.Detector):
         device (None or str): serial number (eg, 1020345) of the device to use
           or None if any device is fine.
         dependencies (dict str -> Component): shutters components (shutter0 through
-         shutter7 are valid)
+         shutter8 are valid. shutter0 corresponds to the sync signal)
         children (dict str -> kwargs): the names of the detectors (detector0 through
-         detector7 are valid)
+         detector8 are valid. detector0 corresponds to the sync signal)
+        # TODO JN: Treat the sync signal as a child (detector)
 
-        # TODO JN: Treat the sync signal as a child (detector)?
         sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (in V)
         sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (in V)
-        disc_volt (8 (0 <= float <= 1.0)): discriminator voltage for the APD 0 through 8 (in V)
-        zero_cross (8 (0 <= float <= 40 e-3)): zero cross voltage for the APD 0 through 8 (in V)
+        disc_volt (8 (0 <= float <= 1.0)): discriminator voltage for the photo-detector 1 through 8 (in V)
+        zero_cross (8 (0 <= float <= 40 e-3)): zero cross voltage for the photo-detector 1 through 8 (in V)
         shutter_axes (dict str -> str, value, value): internal child role of the photo-detector ->
           axis name, position when shutter is closed (ie protected), position when opened (receiving light).
 
@@ -337,12 +337,12 @@ class HH400(model.Detector):
             disc_volt = []
             for i in children.items():
                 disc_volt.append(0)
-            # disc_volt = [0, 0]
+            disc_volt.pop(0) # ignore the detector0 child (sync signal)
         if zero_cross is None:
             zero_cross = []
             for i in children.items():
                 zero_cross.append(0)
-            # zero_cross = [0, 0]
+            zero_cross.pop(0) # ignore the detector0 child (sync signal)
 
         super(HH400, self).__init__(
             name, role, daemon=daemon, dependencies=dependencies, **kwargs
@@ -375,7 +375,8 @@ class HH400(model.Detector):
         self._shutters = {}
         self._shutter_axes = shutter_axes or {}
         # The PH300 code only accepts detector0 or detector1
-        # This HH400 code should work for up to 8 detectors
+        # This HH400 code should work for up to 8 detectors, in addition to the sync signal
+        # detector0 should correspond to the sync signal
         for name, ckwargs in children.items():
             num = int(name.split("detector")[1])
             # TODO JN: This name parsing could be more elegant
@@ -394,7 +395,7 @@ class HH400(model.Detector):
                 self.children.value.add(self._detectors[name])
             else:
                 raise ValueError(
-                    "Child %s not recognized, should be detector0 .. detector7." % name
+                    "Child %s not recognized, should be detector0 .. detector8." % name
                 )
 
         for name, comp in dependencies.items():
@@ -405,7 +406,7 @@ class HH400(model.Detector):
                 self._shutters["shutter%s" % num] = comp
             else:
                 raise ValueError(
-                    "Dependency %s not recognized, should be shutter0 .. shutter7."
+                    "Dependency %s not recognized, should be shutter0 .. shutter8."
                     % name
                 )
 
@@ -1311,7 +1312,7 @@ class HH400(model.Detector):
 
 class HH400RawDetector(model.Detector):
     """
-    Represents a raw detector (eg, APD) accessed via PicoQuant HydraHarp 400.
+    Represents a raw detector (eg, APD, PMT) accessed via PicoQuant HydraHarp 400.
     Cannot be directly created. It must be done via HH400 child.
     **Copied from PH300RawDetector with PH300 changed to HH400** ~Eric Liu
     """
