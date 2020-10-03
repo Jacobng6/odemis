@@ -50,7 +50,7 @@ CONFIG_DET1 = {"name": "APD1", "role": "cl-detector2"}
 
 CONFIG_HH = {"name": "HH400", "role": "time-correlator", "device": None,
              "sync_level" : 50e-3, "sync_zc": 10e-3, 
-             "disc_volt": 30e-3, "zero_cross": 10e-3,
+             "disc_volt": [30e-3], "zero_cross": [10e-3],
              "children": {"detector0": CONFIG_DET0, "detector1": CONFIG_DET1}}
 
 if TEST_NOHW:

@@ -307,8 +307,8 @@ class HH400(model.Detector):
          detector8 are valid. detector0 corresponds to the sync signal)
         # TODO JN: Treat the sync signal as a child (detector)
 
-        sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (in V)
-        sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (in V)
+        sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (detector0) (in V)
+        sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (detector0) (in V)
         disc_volt (8 (0 <= float <= 1.0)): discriminator voltage for the photo-detector 1 through 8 (in V)
         zero_cross (8 (0 <= float <= 40 e-3)): zero cross voltage for the photo-detector 1 through 8 (in V)
         shutter_axes (dict str -> str, value, value): internal child role of the photo-detector ->
