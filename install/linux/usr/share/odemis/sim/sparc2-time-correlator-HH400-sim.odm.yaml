@@ -11,7 +11,7 @@ SPARC2-VisNIR-TR: {
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "TR CL Detector", "Fiber Detector"],
+               "Lens1 Mover", "Lens2 Switch", "CL Detector", "Fiber Detector"],
 }
 
 # Light (lamp with known spectrum)
