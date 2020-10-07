@@ -386,7 +386,7 @@ SPARC2-VisNIR-TR: {
         FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align"
+    affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align",
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
