@@ -11,7 +11,7 @@ SPARC2-VisNIR-TR: {
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "CL Detector", "Fiber Detector"],
+               "Lens1 Mover", "Lens2 Switch", "TR CL Detector", "Fiber Detector"],
 }
 
 # Light (lamp with known spectrum)
@@ -64,7 +64,7 @@ SPARC2-VisNIR-TR: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
-       detector1: "CL PMT",
+       detector2: "TR CL PMT",
     }
 }
 
@@ -106,12 +106,12 @@ SPARC2-VisNIR-TR: {
     # Internal child of SEM Scan Interface, so no class
     role: se-detector,
     init: {
-        channel: 1,
+        channel: 1, # 0-> sawtooth waves, 1-> square waves
         limits: [-3, 3], # V
     },
 }
 
-"CL PMT": { # the raw detector of the PMT
+"TR CL PMT": { # the raw detector of the PMT
     # Internal child of SEM Scan Interface, so no class but instead a creator
     creator: "SEM Scan Interface",
     role: null,
