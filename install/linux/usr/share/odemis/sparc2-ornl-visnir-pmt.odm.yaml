@@ -23,13 +23,13 @@ SPARC2-VisNIR: {
     class: powerctrl.PowerControlUnit,
     role: "power-control",
     init: {
-#        port: "/dev/fake", # for simulator
+        # port: "/dev/fake", # for simulator
         port: "/dev/ttyPMT*",
         pin_map: {
             "Camera": 0,
             "Spectrograph": 2,
             "Optical Actuators": 4,
-            "CL PMT control unit":5,
+            "CL PMT control unit": 5,
             "Calibration Light": 6,
         },
         delay: { # Time it takes (in s) before a component is accessible

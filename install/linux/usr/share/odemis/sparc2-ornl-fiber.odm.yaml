@@ -24,7 +24,7 @@ SPARC2-Fiber: {
     class: powerctrl.PowerControlUnit,
     role: "power-control",
     init: {
-#        port: "/dev/fake", # for simulator
+        # port: "/dev/fake", # for simulator
         port: "/dev/ttyPMT*",
         pin_map: {
             "Camera": 0,
@@ -293,7 +293,7 @@ SPARC2-Fiber: {
         # TODO put correct value
         FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
     },
-    affects: ["Fiber Detector", "Fake Spectrograph", "Fake Camera", "Fiber Detector"],
+    affects: ["Fiber Detector", "Fake Spectrograph", "Fake Camera"],
 }
 
 # Mirror in Plate 2, selects between spectrometer and external optics (fiber output)
@@ -312,7 +312,7 @@ SPARC2-Fiber: {
         FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
-    affects: ["Fiber align", "Fiber Detector", "Camera", "Spectrometer", "Fake Spectrograph", "Fake Camera", "Fiber Detector"],
+    affects: ["Fiber align", "Fiber Detector", "Camera", "Spectrometer", "Fake Spectrograph", "Fake Camera"],
 }
 
 # Fake spectograph for providing a fake spectrometer
