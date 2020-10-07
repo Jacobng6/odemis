@@ -742,6 +742,7 @@ class HH400(model.Detector):
         stop_ovfl = 1 if stop else 0
         self._dll.HH_SetStopOverflow(self._idx, stop_ovfl, stopcount)
 
+    @autoretry
     def SetBinning(self, bincode):
         """
         bincode (0<=int): binning code. Binsteps = 2**bodeinc (e.g., bc = 0 for binsteps = 1, bc = 3 for binsteps = 8)
@@ -865,6 +866,7 @@ class HH400(model.Detector):
         self._dll.HH_GetHistogram(self._idx, buf_ct, channel, clear_int)
         return buf
 
+    @autoretry
     def GetResolution(self):
         """
         Current time resolution, taking into account the binning
