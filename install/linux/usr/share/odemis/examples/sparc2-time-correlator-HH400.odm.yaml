@@ -430,21 +430,21 @@ SPARC2-VisNIR-TR: {
         sync_zc: 10.e-3, # V (< 40 mV)
         disc_volt: [30.e-3], # V, discriminator for detector 0 (< 1.0 V)
         zero_cross: [10.e-3], # V (< 40 mV)
-        shutter_axes: {
-        # internal child role of the actuator -> axis name, position when shutter is closed (ie, protected), position when opened (receiving light)
-            "shutter0": ["x", 1, 0],
-            "shutter1": ["x", 1, 0],
-        },
+        # shutter_axes: {
+        # # internal child role of the actuator -> axis name, position when shutter is closed (ie, protected), position when opened (receiving light)
+        #     "shutter0": ["x", 1, 0],
+        #     "shutter1": ["x", 1, 0],
+        # },
     },
     # These children allow to have access to the raw data on the PMTs
     children: {
         "detector0": "Photon counter sync",
         "detector1": "Photon counter signal",
     },
-    dependencies: {
-        "shutter0": "Shutter 0",
-        "shutter1": "Shutter 1",
-    },
+    # dependencies: {
+    #     "shutter0": "Shutter 0",
+    #     "shutter1": "Shutter 1",
+    # },
 }
 
 "Photon counter sync": {
