@@ -450,11 +450,13 @@ SPARC2-VisNIR-TR: {
 
 "Photon counter sync": {
     # Internal child of "Time Correlator", so no class
+    creator: "Time Correlator", 
     role: photo-detector1,
 }
 
 "Photon counter signal": {
     # Internal child of "Time Correlator", so no class
+    creator: "Time Correlator", 
     role: photo-detector0, # det0, to be shown as main graph in GUI
 }
 
