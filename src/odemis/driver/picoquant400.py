@@ -303,6 +303,7 @@ class HH400(model.Detector):
           or None if any device is fine.
         dependencies (dict str -> Component): shutters components (shutter0 through
          shutter8 are valid. shutter0 corresponds to the sync signal)
+         # TODO JN: Ignore shutters for our purposes
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector8 are valid. detector0 corresponds to the sync signal)
         # TODO JN: Treat the sync signal as a child (detector)
@@ -742,6 +743,7 @@ class HH400(model.Detector):
         stop_ovfl = 1 if stop else 0
         self._dll.HH_SetStopOverflow(self._idx, stop_ovfl, stopcount)
 
+    @autoretry
     def SetBinning(self, bincode):
         """
         bincode (0<=int): binning code. Binsteps = 2**bodeinc (e.g., bc = 0 for binsteps = 1, bc = 3 for binsteps = 8)
@@ -865,6 +867,7 @@ class HH400(model.Detector):
         self._dll.HH_GetHistogram(self._idx, buf_ct, channel, clear_int)
         return buf
 
+    @autoretry
     def GetResolution(self):
         """
         Current time resolution, taking into account the binning
