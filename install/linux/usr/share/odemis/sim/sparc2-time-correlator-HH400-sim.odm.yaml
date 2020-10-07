@@ -121,17 +121,18 @@ SPARC2-VisNIR-TR: {
     },
 }
 
-"CL PMT control unit": {
-    class: pmtctrl.PMTControl,
-    role: null,
-    power_supplier: "Power Control Unit",
-    init: {
-        # port: "/dev/ttyPMT*",
-        port: "/dev/fake", # for simulator
-        prot_time: 0.0002,  # s
-        prot_curr: 20.e-6,  # A
-    }
-}
+# "CL PMT control unit": {
+#     class: pmtctrl.PMTControl,
+#     role: null,
+#     power_supplier: "Power Control Unit",
+#     init: {
+#         # port: "/dev/ttyPMT*",
+#         port: "/dev/fake", # for simulator
+#         prot_time: 0.0002,  # s
+#         prot_curr: 20.e-6,  # A
+#     }
+# }
+
 "CL Detector": {
     class: pmtctrl.PMT,
     role: cl-detector,
@@ -140,8 +141,8 @@ SPARC2-VisNIR-TR: {
     },
     children: {
        "detector": "TR CL PMT",
-       # "pmt-signal": "Photon counter signal",
-       "pmt-control": "CL PMT control unit",
+       "pmt-signal": "Photon counter signal",
+       # "pmt-control": "CL PMT control unit",
     },
 }
 
