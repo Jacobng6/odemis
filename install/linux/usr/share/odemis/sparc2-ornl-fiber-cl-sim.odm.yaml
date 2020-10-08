@@ -1,17 +1,15 @@
-# Configuration for the SPARC v2 system with plates:
-# 1. Vis-NIR
-# 2. Fiber module (to time correlator)
-
-SPARC2-VisNIR-TR: {
+# Configuration for the SPARC v2 system
+SPARC2-Fiber: {
     class: Microscope,
     role: sparc2,
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
-               "Optical Path Properties", "Spectrometer Selector",
-               "Camera", "Spectrometer", "Spectrograph", "Fiber align",
-               "Time Correlator", "Photon counter sync", "Photon counter signal",
-               "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
+               "Optical Path Properties",
+               "Camera", "Spectrometer",
+               "Spectrograph",
+               "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "CL Detector", "Fiber Detector"],
+               "Lens1 Mover", "Lens2 Switch",
+               "Spectrometer Selector", "Fiber Detector"],
 }
 
 # Light (lamp with known spectrum)
@@ -19,39 +17,31 @@ SPARC2-VisNIR-TR: {
     class: light.Light,
     role: "brightlight",
     power_supplier: "Power Control Unit",
-    affects: ["Camera", "Spectrometer", "Fiber Detector", 
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
+    affects: ["Camera", "Spectrometer", "Fiber Detector"],
 }
 
 "Power Control Unit": {
     class: powerctrl.PowerControlUnit,
     role: "power-control",
     init: {
-        # port: "/dev/fake", # for simulator
-        port: "/dev/ttyPMT*",
+        port: "/dev/fake",
         pin_map: {
-            "Camera": 0,
+            "Calibration Light": 6,
             "Spectrograph": 2,
             "Optical Actuators": 4,
-            # "CL PMT control unit": 5,
-            "Calibration Light": 6,
         },
-        delay: { # Time it takes (in s) before a component is accessible
-            "Calibration Light": 1, # To turn on/off the light, with most bulbs it's very fast
-            "Camera": 2,
-            "Spectrograph": 90, # SR-193 needs a looong time to initialise
-            "Optical Actuators": 2,
-            # "CL PMT control unit": 0,
+        delay: { # Time it takes before a component is accessible
+            "Calibration Light": 0, # To turn on/off the light, it's immediate
+            "Spectrograph": 3, # SR-193 needs a looong time to initialise
+            "Optical Actuators": 1,
         },
         init: { # Which component to power on from the very beginning (to save time)
             "Calibration Light": True, # turn if on initially, to warm up. It will automatically be off when the component starts
-            "Camera": True,
             "Spectrograph": True,
             "Optical Actuators": True,
         },
         # List of EEPROM IDs (of the plates) which are required to start properly
-        # TODO: remove the one from the power control unit itself
-        ids: [23be9e310300008a, 233b7e3103000051],
+        ids: [],
     }
 }
 
@@ -64,7 +54,7 @@ SPARC2-VisNIR-TR: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
-       detector2: "TR CL PMT",
+       detector7: "Fiber Detector",
     }
 }
 
@@ -81,7 +71,7 @@ SPARC2-VisNIR-TR: {
         # On Delmic scanning box v2, the voltage is x2, so need to specify twice smaller values than needed.
         limits: [[2.77, -2.77], [1.82, -1.82]],  # V
         park: [-3.5, -3.5], # V
-        max_res: [5760, 3840], # px
+        max_res: [5760, 3840], #px
         # Digital output port mapping on the Delmic scanning box v2:
         # 0 = Relay
         # 1 = Open drain output (Y0.0)
@@ -97,8 +87,7 @@ SPARC2-VisNIR-TR: {
         dwellTime: 3.e-6, # s
         magnification: 100, # (ratio), start low for a big field of view
     },
-    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector", # affects the CCD in case of cathodoluminescence
-              "Time Correlator", "Photon counter sync", "Photon counter signal"] 
+    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector"], # affects the CCD in case of cathodoluminescence
 }
 
 # Must be connected on AI1/AI9 (differential)
@@ -106,44 +95,18 @@ SPARC2-VisNIR-TR: {
     # Internal child of SEM Scan Interface, so no class
     role: se-detector,
     init: {
-        channel: 1, # 0-> sawtooth waves, 1-> square waves
-        limits: [-3, 3], # V
+        channel: 0, # 0-> sawtooth waves, 1-> square waves
+        limits: [-3, 3],  # V
     },
 }
 
-"TR CL PMT": { # the raw detector of the PMT
-    # Internal child of SEM Scan Interface, so no class but instead a creator
-    creator: "SEM Scan Interface",
-    role: null,
-    init: {
-        channel: 0,
-        # TODO: check the limits
-        limits: [-2.5, 2.5], # V, with contrast reversed
-    },
-}
-
-# "CL PMT control unit": {
-#     class: pmtctrl.PMTControl,
-#     role: null,
-#     power_supplier: "Power Control Unit",
-#     init: {
-#         port: "/dev/ttyPMT*",
-#         #port: "/dev/fake", # for simulator
-#         prot_time: 0.0002,  # s
-#         prot_curr: 20.e-6,  # A
-#     }
-# }
-
-"CL Detector": {
-    class: pmtctrl.PMT,
+# Fake detector connected to nothing, to let the user select the fiber output
+"Fiber Detector": {
+    # Internal child of SEM Scan Interface, so no class
     role: cl-detector,
     init: {
-        settle_time: 0.5,  # s, time for the shutter to fully open
-    },
-    children: {
-       "detector": "TR CL PMT",
-       "pmt-signal": "Photon counter signal",
-       # "pmt-control": "CL PMT control unit",
+        channel: 7,
+        limits: [-3, 3] # V
     },
 }
 
@@ -151,53 +114,49 @@ SPARC2-VisNIR-TR: {
 "Camera": {
     class: andorcam2.AndorCam2,
     role: ccd,
-    #power_supplier: "Power Control Unit",
     init: {
-        #device: 0,
-        device: "23175" ,
-        transp: [-1, 2], # if mirrored on X axis, change 1 to -1
+        device: "fake",
+        transp: [1, 2], # if mirrored on X axis, change 1 to -1
         shutter_times: [50.e-3, 50.e-3], # s, opening/closing times of the shutter  # TODO: put the right values
     },
     properties: {
         shutterMinimumPeriod: 0.1, # s  = Max 10Hz frequency # TODO: put the right value for the shutter
         targetTemperature: -65,
-        fanSpeed: 0, # °C  # TODO: might be possible to go a bit further below
+        fanSpeed: 0, # °C
     },
 }
 
 # VIS-NIR Spectrometer = Andor Newton + Shamrock SR193 (connected via USB)
 "Spectrometer": {
     class: spectrometer.CompositedSpectrometer,
-    role: spectrometer,
+    role: spectrometer0,
     children: {detector: "Camera", spectrograph: "Spectrograph"},
     init: {
         transp: [-1, 2], # inverse X axis
     },
     properties: {
-#        binning: [1, 1000],  # default binning x height
+        #binning: [4, 1080],  # 1080 instead of 2160, to acquire only on half of the CCD
     },
 }
 
-# Internal Spectrograph = Kymera 193 (+ 2 cameras)
 "Spectrograph": {
     class: andorshrk.Shamrock,
     role: spectrograph,
     power_supplier: "Power Control Unit",
     init: {
-        device: "SR-2875",
-        #device: "fake",
+        device: "fake",
         slits: {1: "slit-in", # INPUT_SIDE
         },
         bands: { # The filters in the filter-wheel
             1: "pass-through",
-            2: [375.e-9, 425.e-9], # pos -> m,m
-            3: [425.e-9, 475.e-9],
-            4: [475.e-9, 525.e-9],
-            5: [525.e-9, 575.e-9],
-            6: [575.e-9, 625.e-9],
+            2: [475.e-9, 525.e-9], # pos -> m,m
+            3: [525.e-9, 575.e-9],
+            4: [575.e-9, 625.e-9],
+            5: [625.e-9, 675.e-9],
+            6: [675.e-9, 725.e-9],
         },
         fstepsize: 30.e-6, # m, size of one focus step  (Note: it used to be set at 10µm, but from physical inspection 30µm seems more correct)
-        drives_shutter: [0], # flipper positions: the Spectral Camera drives the shutter
+        drives_shutter: [1.5707963267948966] # flipper positions: the Spectral Camera drives the shutter
     },
     affects: ["Camera", "Spectrometer"],
 }
@@ -222,8 +181,8 @@ SPARC2-VisNIR-TR: {
     init: {
         axis_name: "flip-out",
         positions: {
-            0: ["Camera", "Spectrometer"],
-            1.5707963267948966: [],
+            0: [],  # TODO: check it's indeed not on the direct port
+            1.5707963267948966: ["Camera", "Spectrometer"],
         },
     },
     affects: ["Camera", "Spectrometer"],
@@ -248,6 +207,7 @@ SPARC2-VisNIR-TR: {
        mag: 0.32, # ratio
        na: 0.2, # ratio, numerical aperture
        ri: 1.0, # ratio, refractive index
+       x_max: 13.25e-3,  # m, the distance between the parabola origin and the cutoff position
        pole_pos: [600, 610], # (px, px), position of the pole (aka the hole in the mirror)
        x_max: 13.25e-3,  # m, the distance between the parabola origin and the cutoff position
        hole_diam: 0.6e-3,  # m, diameter the hole in the mirror
@@ -256,19 +216,17 @@ SPARC2-VisNIR-TR: {
        # TODO: update for the Quanta
        rotation: -1.570796326795, # rad, 90° rotation between optical axis and SEM Y axis
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"]
+    affects: ["Camera", "Spectrometer", "Fiber Detector"],
 }
 
 # Controller for the motors moving the various parts of the optical box
-# DIP must be configured with address 2 (= 0100000)
 "Optical Actuators": {
     class: tmcm.TMCLController,
     role: null,
     power_supplier: "Power Control Unit",
     init: {
-        port: "/dev/ttyTMCM*",
-        address: 2,
+        port: "/dev/fake6",
+        address: null,
         axes: ["l1", "l2", "spec-sel", "fiby", "slit"],
         # These values only need to be roughly correct
         ustepsize: [25.1e-9, 25.1e-9, 25.1e-9, 5.86e-9, 5.e-9], # m/µstep
@@ -279,24 +237,6 @@ SPARC2-VisNIR-TR: {
         inverted: ["l2"],
     },
 }
-
-# "Optical Actuators": {
-#     class: tmcm.TMCLController,
-#     role: null,
-#     power_supplier: "Power Control Unit",
-#     init: {
-#         port: "/dev/ttyTMCM*",
-#         address: 2,
-#         axes: ["l1", "l2", "cl-sel", "fw", "slit"],
-#         # These values only need to be roughly correct
-#         ustepsize: [25.1e-9, 25.1e-9, 26.1e-9, 3.392e-5, 5.e-9], # m/µstep, excepted for the fw: rad/µstep
-#         unit: ["m", "m", "m", "rad", "m"],
-#         refproc: "Standard",
-#         refswitch: {"l1": 0, "l2": 0, "cl-sel": 4, "fw": 4},
-#         inverted: ["l2"],
-#         param_file: "/usr/share/odemis/sparc2-atm-tmcm6110-pmt.tmcm.tsv",
-#     },
-# }
 
 # The first lens of Plate 1, able to move along the whole range
 "Lens1 Mover": {
@@ -309,7 +249,7 @@ SPARC2-VisNIR-TR: {
     },
     metadata: {
         # Default position of the lens (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0316005737} # m
+        FAV_POS_ACTIVE: {"x": 0.0261101096} # m
     },
     affects: ["Lens2 Switch"],
 }
@@ -322,12 +262,11 @@ SPARC2-VisNIR-TR: {
     init: {
         axis_name: "l2",
         positions: {
-            -0.060310003: "on",
+            -0.005070: "on",
             0.0: "off", # completely out of the path
         },
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
+    affects: ["Camera", "Spectrometer"],
 }
 
 # Control the slit position to either fully-open or small (dependent on the spectrometer slit-in)
@@ -338,30 +277,13 @@ SPARC2-VisNIR-TR: {
     init: {
         axis_name: "slit",
         positions: {
-            -0.0: "on", # fully opened
+            -0.000: "on", # fully opened
             0.0012: "off", # opening based on the small slit
         },
     },
     affects: ["Camera", "Spectrometer"],
 }
 
-# Mirror in Plate 2, selects between spectrometer and cl-detector
-# "CL Selector": {
-#     class: actuator.FixedPositionsActuator,
-#     role: "cl-det-selector",
-#     children: {"x": "Optical Actuators"},
-#     init: {
-#         axis_name: "cl-sel",
-#         positions: {
-#             0.00123453: ["CL Detector"],
-#             0.0388107: ["Spec CCD Flipper"]
-#         },
-#     },
-#     affects: ["Camera", "Spectrometer", "CL Detector"],
-# }
-
-# Note that the next two components actually move the _same_ axis!
-# Mirror & Lens in Plate 2, to change X&Y of fiber alignment
 "Fiber align": {
     class: actuator.MultiplexActuator,
     role: "fiber-aligner",
@@ -373,9 +295,9 @@ SPARC2-VisNIR-TR: {
     metadata: {
         # Default position of the lens (can be improved by user)
         # TODO put correct value
-        FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
+        FAV_POS_ACTIVE: {"y": 0.000372989} # m
     },
-    affects: ["Fiber Detector", "Time Correlator", "Photon counter sync", "Photon counter signal"],
+    affects: ["Fiber Detector"],
 }
 
 # Mirror in Plate 2, selects between spectrometer and external optics (fiber output)
@@ -389,81 +311,12 @@ SPARC2-VisNIR-TR: {
     },
     metadata: {
         # Position of the mirror to select the external spectrometer (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0126050192}, # m
+        FAV_POS_ACTIVE: {"x": 0.0116214336}, # m
         FAV_POS_ACTIVE_DEST: ["Fiber align", "Fiber Detector"],
-        FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
+        FAV_POS_DEACTIVE: {"x": 0.013419}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
-}
-
-# "CL Filter Wheel": {
-#     class: actuator.FixedPositionsActuator,
-#     role: "cl-filter",
-#     children: {"band": "Optical Actuators"},
-#     init: {
-#         axis_name: "fw",
-#         # It supports up to 8 filters
-#         positions: {
-#             # pos (rad) -> m,m
-#             0.3392:        "pass-through",        # 1
-#             1.1245981634:  [375.e-9, 425.e-9],    # 2
-#             1.90999632679: [425.e-9, 475.e-9],    # 3
-#             2.69539:       [475.e-9, 525.e-9],    # 4
-#             3.48079:       [525.e-9, 575.e-9],    # 5
-#             4.26619081699: [575.e-9, 625.e-9],    # 6
-#             5.05159:       [625.e-9, 675.e-9],    # 7
-#             5.83699:       [675.e-9, 725.e-9],    # 8
-#         },
-#         cycle: 6.283185, # position of ref switch (0) after a full turn
-#     },
-#     affects: ["CL Detector"],
-# }
-
-"Time Correlator": {
-    class: picoquant400.HH400,
-    role: time-correlator,
-    init: {
-        # device: "fake",
-        device: null, # put serial number, or it will pick the first one found
-        sync_level: 50.e-3, # V, discriminator for sync signal (< 1.0 V)
-        sync_zc: 10.e-3, # V (< 40 mV)
-        disc_volt: [30.e-3], # V, discriminator for detector 0 (< 1.0 V)
-        zero_cross: [10.e-3], # V (< 40 mV)
-        # shutter_axes: {
-        # # internal child role of the actuator -> axis name, position when shutter is closed (ie, protected), position when opened (receiving light)
-        #     "shutter0": ["x", 1, 0],
-        #     "shutter1": ["x", 1, 0],
-        # },
-    },
-    # These children allow to have access to the raw data on the PMTs
-    children: {
-        "detector0": "Photon counter sync",
-        "detector1": "Photon counter signal",
-    },
-    # dependencies: {
-    #     "shutter0": "Shutter 0",
-    #     "shutter1": "Shutter 1",
-    # },
-}
-
-"Photon counter sync": {
-    # Internal child of "Time Correlator", so no class
-    creator: "Time Correlator", 
-    role: photo-detector1,
-}
-
-"Photon counter signal": {
-    # Internal child of "Time Correlator", so no class
-    creator: "Time Correlator", 
-    role: photo-detector0, # det0, to be shown as main graph in GUI
-}
-
-"Fiber Detector": {
-    class: spectrometer.CompositedSpectrometer,
-    role: spectrometer1,
-    children: {detector: "Camera", spectrograph: "Spectrograph"},
+    affects: ["Fiber align", "Fiber Detector", "Camera", "Spectrometer"],
 }
 
 # Controller for moving the 'Redux' stage
@@ -472,20 +325,17 @@ SPARC2-VisNIR-TR: {
     class: tmcm.TMCLController,
     role: "mirror",
     init: {
-        port: "/dev/ttyTMCM*",
-        address: 4,
-        #port: "/dev/fake6",
-        #address: null,
+        port: "/dev/fake6",
+        address: null,
         axes: ["l", "s"],
-        ustepsize: [5.9e-9, 5.9e-9], # m/µstep
-        #ustepsize: [3.e-6,3.e-6], #this is only for sim
+        ustepsize: [1.e-6, 1.e-6], # m/µstep (big, for the simulator to move fast)
         refproc: "Standard",
         refswitch: {"s": 0, "l": 0},
     },
     metadata: {
         # Default position of the mirror engaged (will be improved during alignment)
         # TODO: update for Quanta Redux stage
-        FAV_POS_ACTIVE: {"l": 0.0464095534, "s": -0.0019880168},  # m, m
+        FAV_POS_ACTIVE: {"l": 0.048, "s": -0},  # m, m
     },
 }
 
@@ -496,8 +346,10 @@ SPARC2-VisNIR-TR: {
     role: "mirror-xy",
     children: {"orig": "Mirror Actuators"},
     init: {
+        # TODO: update for the Quanta
         axes: ["l", "s"], # mapped respectively to X, Y
-        rotation: 0.17453292519 # rad (= 10°)
+        rotation: 2.181661565, #0.95993108859688, # rad (= 125°)
         # Note: if you want to use absolute moves, add a "translation" too
     },
 }
+

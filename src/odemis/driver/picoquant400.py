@@ -303,6 +303,7 @@ class HH400(model.Detector):
           or None if any device is fine.
         dependencies (dict str -> Component): shutters components (shutter0 through
          shutter8 are valid. shutter0 corresponds to the sync signal)
+         # TODO JN: Ignore shutters for our purposes
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector8 are valid. detector0 corresponds to the sync signal)
         # TODO JN: Treat the sync signal as a child (detector)
