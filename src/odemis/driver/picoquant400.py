@@ -879,6 +879,7 @@ class HH400(model.Detector):
         self._dll.HH_GetResolution(self._idx, byref(res))
         return res.value
 
+    @autoretry
     def GetSyncRate(self):
         """
         return:
