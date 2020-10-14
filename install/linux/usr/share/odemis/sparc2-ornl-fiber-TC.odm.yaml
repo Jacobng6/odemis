@@ -1,17 +1,14 @@
-# Configuration for the SPARC v2 system with plates:
-# 1. Vis-NIR
-# 2. Fiber module (to time correlator)
-
-SPARC2-VisNIR-TR: {
+# Configuration for the SPARC v2 system
+SPARC2-Fiber: {
     class: Microscope,
     role: sparc2,
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
                "Optical Path Properties", "Spectrometer Selector",
-               "Camera", "Spectrometer", "Spectrograph", "Fiber align",
+               "Camera", "Spectrometer", "Spectrograph", "Fiber align", 
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "Fiber Detector"], # "CL Detector", 
+               "Lens1 Mover", "Lens2 Switch", "Fiber Detector"],
 }
 
 # Light (lamp with known spectrum)
@@ -33,7 +30,6 @@ SPARC2-VisNIR-TR: {
             "Camera": 0,
             "Spectrograph": 2,
             "Optical Actuators": 4,
-            # "CL PMT control unit": 5,
             "Calibration Light": 6,
         },
         delay: { # Time it takes (in s) before a component is accessible
@@ -41,7 +37,6 @@ SPARC2-VisNIR-TR: {
             "Camera": 2,
             "Spectrograph": 90, # SR-193 needs a looong time to initialise
             "Optical Actuators": 2,
-            # "CL PMT control unit": 0,
         },
         init: { # Which component to power on from the very beginning (to save time)
             "Calibration Light": True, # turn if on initially, to warm up. It will automatically be off when the component starts
@@ -50,7 +45,6 @@ SPARC2-VisNIR-TR: {
             "Optical Actuators": True,
         },
         # List of EEPROM IDs (of the plates) which are required to start properly
-        # TODO: remove the one from the power control unit itself
         ids: [23be9e310300008a, 233b7e3103000051],
     }
 }
@@ -64,7 +58,7 @@ SPARC2-VisNIR-TR: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
-    #    detector2: "TR CL PMT",
+    #    detector7: "Fiber Detector",
     }
 }
 
@@ -97,7 +91,7 @@ SPARC2-VisNIR-TR: {
         dwellTime: 3.e-6, # s
         magnification: 100, # (ratio), start low for a big field of view
     },
-    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector", 
+    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector",
               "Time Correlator", "Photon counter sync", "Photon counter signal"] # affects the CCD in case of cathodoluminescence
 }
 
@@ -110,42 +104,6 @@ SPARC2-VisNIR-TR: {
         limits: [-3, 3], # V
     },
 }
-
-# "TR CL PMT": { # the raw detector of the PMT
-#     # Internal child of SEM Scan Interface, so no class but instead a creator
-#     creator: "SEM Scan Interface",
-#     role: null,
-#     init: {
-#         channel: 0,
-#         # TODO: check the limits
-#         limits: [-2.5, 2.5], # V, with contrast reversed
-#     },
-# }
-
-# "CL PMT control unit": {
-#     class: pmtctrl.PMTControl,
-#     role: null,
-#     power_supplier: "Power Control Unit",
-#     init: {
-#         port: "/dev/ttyPMT*",
-#         #port: "/dev/fake", # for simulator
-#         prot_time: 0.0002,  # s
-#         prot_curr: 20.e-6,  # A
-#     }
-# }
-
-# "CL Detector": {
-#     class: pmtctrl.PMT,
-#     role: cl-detector,
-#     init: {
-#         settle_time: 0.5,  # s, time for the shutter to fully open
-#     },
-#     children: {
-#        "detector": "TR CL PMT",
-#        "pmt-signal": "Photon counter signal",
-#        # "pmt-control": "CL PMT control unit",
-#     },
-# }
 
 # Dedicated Andor Newton camera for spectrum acquisition
 "Camera": {
@@ -178,7 +136,6 @@ SPARC2-VisNIR-TR: {
     },
 }
 
-# Internal Spectrograph = Kymera 193 (+ 2 cameras)
 "Spectrograph": {
     class: andorshrk.Shamrock,
     role: spectrograph,
@@ -280,24 +237,6 @@ SPARC2-VisNIR-TR: {
     },
 }
 
-# "Optical Actuators": {
-#     class: tmcm.TMCLController,
-#     role: null,
-#     power_supplier: "Power Control Unit",
-#     init: {
-#         port: "/dev/ttyTMCM*",
-#         address: 2,
-#         axes: ["l1", "l2", "cl-sel", "fw", "slit"],
-#         # These values only need to be roughly correct
-#         ustepsize: [25.1e-9, 25.1e-9, 26.1e-9, 3.392e-5, 5.e-9], # m/µstep, excepted for the fw: rad/µstep
-#         unit: ["m", "m", "m", "rad", "m"],
-#         refproc: "Standard",
-#         refswitch: {"l1": 0, "l2": 0, "cl-sel": 4, "fw": 4},
-#         inverted: ["l2"],
-#         param_file: "/usr/share/odemis/sparc2-atm-tmcm6110-pmt.tmcm.tsv",
-#     },
-# }
-
 # The first lens of Plate 1, able to move along the whole range
 "Lens1 Mover": {
     class: actuator.MultiplexActuator,
@@ -345,23 +284,6 @@ SPARC2-VisNIR-TR: {
     affects: ["Camera", "Spectrometer"],
 }
 
-# Mirror in Plate 2, selects between spectrometer and cl-detector
-# "CL Selector": {
-#     class: actuator.FixedPositionsActuator,
-#     role: "cl-det-selector",
-#     children: {"x": "Optical Actuators"},
-#     init: {
-#         axis_name: "cl-sel",
-#         positions: {
-#             0.00123453: ["CL Detector"],
-#             0.0388107: ["Spec CCD Flipper"]
-#         },
-#     },
-#     affects: ["Camera", "Spectrometer", "CL Detector"],
-# }
-
-# Note that the next two components actually move the _same_ axis!
-# Mirror & Lens in Plate 2, to change X&Y of fiber alignment
 "Fiber align": {
     class: actuator.MultiplexActuator,
     role: "fiber-aligner",
@@ -398,27 +320,29 @@ SPARC2-VisNIR-TR: {
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
-# "CL Filter Wheel": {
-#     class: actuator.FixedPositionsActuator,
-#     role: "cl-filter",
-#     children: {"band": "Optical Actuators"},
+# Fake spectograph for providing a fake spectrometer
+# "Fake Spectrograph": {
+#     class: andorshrk.Shamrock,
+#     role: spectrograph1,
 #     init: {
-#         axis_name: "fw",
-#         # It supports up to 8 filters
-#         positions: {
-#             # pos (rad) -> m,m
-#             0.3392:        "pass-through",        # 1
-#             1.1245981634:  [375.e-9, 425.e-9],    # 2
-#             1.90999632679: [425.e-9, 475.e-9],    # 3
-#             2.69539:       [475.e-9, 525.e-9],    # 4
-#             3.48079:       [525.e-9, 575.e-9],    # 5
-#             4.26619081699: [575.e-9, 625.e-9],    # 6
-#             5.05159:       [625.e-9, 675.e-9],    # 7
-#             5.83699:       [675.e-9, 725.e-9],    # 8
+#         device: "fake",
+#         slits: {1: "slit-in", # INPUT_SIDE
 #         },
-#         cycle: 6.283185, # position of ref switch (0) after a full turn
+#         # 4 gratings, no mirror
+#         # No filter wheel
+#         fstepsize: 30.e-6, # m, size of one focus step
 #     },
-#     affects: ["CL Detector"],
+#     affects: ["Fake Camera", "Fiber Detector"],
+# }
+
+# "Fake Camera": {
+#     class: andorcam2.AndorCam2,
+#     role: sp-ccd1,
+#     init: {
+#         device: "fake",
+#         transp: [1, 2], # if mirrored on X axis
+#         image: "sparc-spec-sim.h5", # only for simulator
+#     },
 # }
 
 "Time Correlator": {

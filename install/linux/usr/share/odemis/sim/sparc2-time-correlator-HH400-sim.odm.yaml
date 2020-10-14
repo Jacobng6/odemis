@@ -11,7 +11,7 @@ SPARC2-VisNIR-TR: {
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "CL Detector", "Fiber Detector"],
+               "Lens1 Mover", "Lens2 Switch", "Fiber Detector"], # "CL Detector", 
 }
 
 # Light (lamp with known spectrum)
@@ -64,7 +64,7 @@ SPARC2-VisNIR-TR: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
-       detector2: "TR CL PMT",
+    #    detector2: "TR CL PMT",
     }
 }
 
@@ -96,8 +96,8 @@ SPARC2-VisNIR-TR: {
         dwellTime: 10.e-6, # s
         magnification: 100, # (ratio)
     },
-    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector", # affects the CCD in case of cathodoluminescence
-              "Time Correlator", "Photon counter sync", "Photon counter signal"] 
+    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector", 
+              "Time Correlator", "Photon counter sync", "Photon counter signal"] # affects the CCD in case of cathodoluminescence
 }
 
 # Must be connected on AI1/AI9 (differential)
@@ -110,16 +110,16 @@ SPARC2-VisNIR-TR: {
     },
 }
 
-"TR CL PMT": { # the raw detector of the PMT
-    # Internal child of SEM Scan Interface, so no class but instead a creator
-    creator: "SEM Scan Interface",
-    role: null,
-    init: {
-        channel: 0,
-        # TODO: check the limits
-        limits: [-2.5, 2.5], # V, with contrast reversed
-    },
-}
+# "TR CL PMT": { # the raw detector of the PMT
+#     # Internal child of SEM Scan Interface, so no class but instead a creator
+#     creator: "SEM Scan Interface",
+#     role: null,
+#     init: {
+#         channel: 0,
+#         # TODO: check the limits
+#         limits: [-2.5, 2.5], # V, with contrast reversed
+#     },
+# }
 
 # "CL PMT control unit": {
 #     class: pmtctrl.PMTControl,
@@ -133,18 +133,18 @@ SPARC2-VisNIR-TR: {
 #     }
 # }
 
-"CL Detector": {
-    class: pmtctrl.PMT,
-    role: cl-detector,
-    init: {
-        settle_time: 0.5,  # s, time for the shutter to fully open
-    },
-    children: {
-       "detector": "TR CL PMT",
-       "pmt-signal": "Photon counter signal",
-       # "pmt-control": "CL PMT control unit",
-    },
-}
+# "CL Detector": {
+#     class: pmtctrl.PMT,
+#     role: cl-detector,
+#     init: {
+#         settle_time: 0.5,  # s, time for the shutter to fully open
+#     },
+#     children: {
+#        "detector": "TR CL PMT",
+#        "pmt-signal": "Photon counter signal",
+#        # "pmt-control": "CL PMT control unit",
+#     },
+# }
 
 # Depending exactly on the configuration, it might also be used for spectrometer
 "Camera": {
@@ -160,6 +160,7 @@ SPARC2-VisNIR-TR: {
         targetTemperature: -10, # °C
     },
 }
+
 # VIS-NIR Spectrometer = Andor Newton + Shamrock SR193 (connected via USB)
 "Spectrometer": {
     class: spectrometer.CompositedSpectrometer,
