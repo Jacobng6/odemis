@@ -248,7 +248,7 @@ SPARC2-Fiber: {
     },
     metadata: {
         # Default position of the lens (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0316005737} # m
+        FAV_POS_ACTIVE: {"x": 0.0274499875} # m
     },
     affects: ["Lens2 Switch"],
 }
@@ -261,7 +261,7 @@ SPARC2-Fiber: {
     init: {
         axis_name: "l2",
         positions: {
-            -0.060310003: "on",
+            -0.0512099738: "on",
             0.0: "off", # completely out of the path
         },
     },
