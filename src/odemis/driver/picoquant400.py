@@ -1079,9 +1079,9 @@ class HH400(model.Detector):
         return offset
 
     def _setAcqOffset(self, offset):
-        offset_ps = int(offset * 1e9)
-        self.SetOffset(offset)
-        offset = offset_ps * 1e-9 # convert the round-down in ps back to s
+        offset_ns = int(offset * 1e9)
+        self.SetOffset(offset_ns)
+        offset = offset_ns * 1e-9 # convert the round-down in ps back to s
         return offset
 
     # Acquisition methods
