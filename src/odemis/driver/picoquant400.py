@@ -366,8 +366,9 @@ class HH400(model.Detector):
 
         self.Calibrate()
 
-        # TODO: needs to be changeable?
-        self.SetOffset(15000)
+        # TODO JN: Make VA so we can change in GUI
+        self.acqOffset = model.FloatContinuous(0, (OFFSETMIN * 1e-12, OFFSETMAX * 1e-12), unit="s",setter=self._setAcqOffset)
+        self._setAcqOffset(self.acqOffset.value)
 
         # To pass the raw count of each detector, we create children detectors.
         # It could also go into just separate DataFlow, but then it's difficult
@@ -1077,6 +1078,12 @@ class HH400(model.Detector):
         # self._metadata[model.MD_TIME_LIST] = tl
         return offset
 
+    def _setAcqOffset(self, offset):
+        offset_ps = int(offset * 1e12)
+        self.SetOffset(offset)
+        offset = offset_ps * 1e-12 # convert the round-down in ps back to s
+        return offset
+
     # Acquisition methods
     def start_generate(self):
         self._genmsg.put(GEN_START)
@@ -1217,6 +1224,7 @@ class HH400(model.Detector):
                 self.GetSyncRate()
                 for i in range(0, self._numinput):
                     self.GetCountRate(i)
+                    # TODO JN: Log and print this count
                 # Check for warnings after getting count rates
                 warnings = self.GetWarnings()
                 if warnings != 0:
