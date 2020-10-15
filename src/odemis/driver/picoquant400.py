@@ -367,7 +367,7 @@ class HH400(model.Detector):
         self.Calibrate()
 
         # TODO: needs to be changeable?
-        self.SetOffset(0)
+        self.SetOffset(15000)
 
         # To pass the raw count of each detector, we create children detectors.
         # It could also go into just separate DataFlow, but then it's difficult
