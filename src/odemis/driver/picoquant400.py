@@ -367,7 +367,7 @@ class HH400(model.Detector):
         self.Calibrate()
 
         # TODO JN: Make VA so we can change in GUI
-        self.acqOffset = model.FloatContinuous(0, (OFFSETMIN * 1e-12, OFFSETMAX * 1e-12), unit="s",setter=self._setAcqOffset)
+        self.acqOffset = model.FloatContinuous(0, (OFFSETMIN * 1e-9, OFFSETMAX * 1e-9), unit="s",setter=self._setAcqOffset)
         self._setAcqOffset(self.acqOffset.value)
 
         # To pass the raw count of each detector, we create children detectors.
@@ -1079,9 +1079,9 @@ class HH400(model.Detector):
         return offset
 
     def _setAcqOffset(self, offset):
-        offset_ps = int(offset * 1e12)
+        offset_ps = int(offset * 1e9)
         self.SetOffset(offset)
-        offset = offset_ps * 1e-12 # convert the round-down in ps back to s
+        offset = offset_ps * 1e-9 # convert the round-down in ps back to s
         return offset
 
     # Acquisition methods
