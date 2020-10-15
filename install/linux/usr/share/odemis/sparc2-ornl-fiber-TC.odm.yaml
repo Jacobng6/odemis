@@ -154,7 +154,7 @@ SPARC2-Fiber: {
             6: [575.e-9, 625.e-9],
         },
         fstepsize: 30.e-6, # m, size of one focus step  (Note: it used to be set at 10µm, but from physical inspection 30µm seems more correct)
-        drives_shutter: [0], # flipper positions: the Spectral Camera drives the shutter
+        drives_shutter: [0] # flipper positions: the Spectral Camera drives the shutter
     },
     affects: ["Camera", "Spectrometer"],
 }
@@ -319,31 +319,6 @@ SPARC2-Fiber: {
     affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align",
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
-
-# Fake spectograph for providing a fake spectrometer
-# "Fake Spectrograph": {
-#     class: andorshrk.Shamrock,
-#     role: spectrograph1,
-#     init: {
-#         device: "fake",
-#         slits: {1: "slit-in", # INPUT_SIDE
-#         },
-#         # 4 gratings, no mirror
-#         # No filter wheel
-#         fstepsize: 30.e-6, # m, size of one focus step
-#     },
-#     affects: ["Fake Camera", "Fiber Detector"],
-# }
-
-# "Fake Camera": {
-#     class: andorcam2.AndorCam2,
-#     role: sp-ccd1,
-#     init: {
-#         device: "fake",
-#         transp: [1, 2], # if mirrored on X axis
-#         image: "sparc-spec-sim.h5", # only for simulator
-#     },
-# }
 
 "Time Correlator": {
     class: picoquant400.HH400,

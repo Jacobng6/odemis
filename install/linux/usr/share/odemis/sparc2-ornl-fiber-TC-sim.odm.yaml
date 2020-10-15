@@ -57,7 +57,7 @@ SPARC2-Fiber: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
-       detector7: "Fiber Detector",
+    #    detector7: "Fiber Detector",
     }
 }
 
@@ -144,14 +144,14 @@ SPARC2-Fiber: {
         },
         bands: { # The filters in the filter-wheel
             1: "pass-through",
-            2: [475.e-9, 525.e-9], # pos -> m,m
-            3: [525.e-9, 575.e-9],
-            4: [575.e-9, 625.e-9],
-            5: [625.e-9, 675.e-9],
-            6: [675.e-9, 725.e-9],
+            2: [375.e-9, 425.e-9], # pos -> m,m
+            3: [425.e-9, 475.e-9],
+            4: [475.e-9, 525.e-9],
+            5: [525.e-9, 575.e-9],
+            6: [575.e-9, 625.e-9],
         },
         fstepsize: 30.e-6, # m, size of one focus step  (Note: it used to be set at 10µm, but from physical inspection 30µm seems more correct)
-        drives_shutter: [1.5707963267948966] # flipper positions: the Spectral Camera drives the shutter
+        drives_shutter: [0] # flipper positions: the Spectral Camera drives the shutter
     },
     affects: ["Camera", "Spectrometer"],
 }
@@ -176,8 +176,8 @@ SPARC2-Fiber: {
     init: {
         axis_name: "flip-out",
         positions: {
-            0: [],  # TODO: check it's indeed not on the direct port
-            1.5707963267948966: ["Camera", "Spectrometer"],
+            0: ["Camera", "Spectrometer"],
+            1.5707963267948966: [],
         },
     },
     affects: ["Camera", "Spectrometer"],
@@ -202,7 +202,6 @@ SPARC2-Fiber: {
        mag: 0.32, # ratio
        na: 0.2, # ratio, numerical aperture
        ri: 1.0, # ratio, refractive index
-       x_max: 13.25e-3,  # m, the distance between the parabola origin and the cutoff position
        pole_pos: [600, 610], # (px, px), position of the pole (aka the hole in the mirror)
        x_max: 13.25e-3,  # m, the distance between the parabola origin and the cutoff position
        hole_diam: 0.6e-3,  # m, diameter the hole in the mirror
@@ -216,6 +215,7 @@ SPARC2-Fiber: {
 }
 
 # Controller for the motors moving the various parts of the optical box
+# DIP must be configured with address 2 (= 0100000)
 "Optical Actuators": {
     class: tmcm.TMCLController,
     role: null,
@@ -245,7 +245,7 @@ SPARC2-Fiber: {
     },
     metadata: {
         # Default position of the lens (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0261101096} # m
+        FAV_POS_ACTIVE: {"x": 0.0274499875} # m
     },
     affects: ["Lens2 Switch"],
 }
@@ -258,7 +258,7 @@ SPARC2-Fiber: {
     init: {
         axis_name: "l2",
         positions: {
-            -0.005070: "on",
+            -0.0512099738: "on",
             0.0: "off", # completely out of the path
         },
     },
@@ -274,7 +274,7 @@ SPARC2-Fiber: {
     init: {
         axis_name: "slit",
         positions: {
-            -0.000: "on", # fully opened
+            -0.0: "on", # fully opened
             0.0012: "off", # opening based on the small slit
         },
     },
@@ -292,7 +292,7 @@ SPARC2-Fiber: {
     metadata: {
         # Default position of the lens (can be improved by user)
         # TODO put correct value
-        FAV_POS_ACTIVE: {"y": 0.000372989} # m
+        FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
     },
     affects: ["Fiber Detector", "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
@@ -308,9 +308,9 @@ SPARC2-Fiber: {
     },
     metadata: {
         # Position of the mirror to select the external spectrometer (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0116214336}, # m
+        FAV_POS_ACTIVE: {"x": 0.0126050192}, # m
         FAV_POS_ACTIVE_DEST: ["Fiber align", "Fiber Detector"],
-        FAV_POS_DEACTIVE: {"x": 0.013419}, # m
+        FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
     affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align",
@@ -325,7 +325,7 @@ SPARC2-Fiber: {
         # device: null, # put serial number, or it will pick the first one found
         sync_level: 50.e-3, # V, discriminator for sync signal (< 1.0 V)
         sync_zc: 10.e-3, # V (< 40 mV)
-        disc_volt: [30.e-3], # V, discriminator for detector 0 (< 1.0 V)
+        disc_volt: [50.e-3], # V, discriminator for detector 0 (< 1.0 V)
         zero_cross: [10.e-3], # V (< 40 mV)
         # shutter_axes: {
         # # internal child role of the actuator -> axis name, position when shutter is closed (ie, protected), position when opened (receiving light)
@@ -356,14 +356,10 @@ SPARC2-Fiber: {
     role: photo-detector0, # det0, to be shown as main graph in GUI
 }
 
-# Fake detector connected to nothing, to let the user select the fiber output
 "Fiber Detector": {
-    # Internal child of SEM Scan Interface, so no class
-    role: cl-detector,
-    init: {
-        channel: 7,
-        limits: [-3, 3] # V
-    },
+    class: spectrometer.CompositedSpectrometer,
+    role: spectrometer1,
+    children: {detector: "Camera", spectrograph: "Spectrograph"},
 }
 
 # Controller for moving the 'Redux' stage
@@ -382,7 +378,7 @@ SPARC2-Fiber: {
     metadata: {
         # Default position of the mirror engaged (will be improved during alignment)
         # TODO: update for Quanta Redux stage
-        FAV_POS_ACTIVE: {"l": 0.048, "s": -0},  # m, m
+        FAV_POS_ACTIVE: {"l": 0.0464095534, "s": -0.0019880168},  # m, m
     },
 }
 
@@ -393,9 +389,8 @@ SPARC2-Fiber: {
     role: "mirror-xy",
     children: {"orig": "Mirror Actuators"},
     init: {
-        # TODO: update for the Quanta
         axes: ["l", "s"], # mapped respectively to X, Y
-        rotation: 2.181661565, #0.95993108859688, # rad (= 125°)
+        rotation: 0.17453292519 # rad (= 10°)
         # Note: if you want to use absolute moves, add a "translation" too
     },
 }
