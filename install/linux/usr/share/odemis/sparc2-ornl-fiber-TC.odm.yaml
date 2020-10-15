@@ -353,7 +353,7 @@ SPARC2-Fiber: {
         device: null, # put serial number, or it will pick the first one found
         sync_level: 50.e-3, # V, discriminator for sync signal (< 1.0 V)
         sync_zc: 10.e-3, # V (< 40 mV)
-        disc_volt: [30.e-3], # V, discriminator for detector 0 (< 1.0 V)
+        disc_volt: [50.e-3], # V, discriminator for detector 0 (< 1.0 V)
         zero_cross: [10.e-3], # V (< 40 mV)
         # shutter_axes: {
         # # internal child role of the actuator -> axis name, position when shutter is closed (ie, protected), position when opened (receiving light)
