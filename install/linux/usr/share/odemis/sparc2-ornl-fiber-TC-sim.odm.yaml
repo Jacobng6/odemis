@@ -4,7 +4,7 @@ SPARC2-Fiber: {
     role: sparc2,
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
                "Optical Path Properties", "Spectrometer Selector",
-               "Camera", "Spectrometer", "Spectrograph", "Fiber align", 
+               "Camera", "Spectrometer", "Spectrograph",
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",

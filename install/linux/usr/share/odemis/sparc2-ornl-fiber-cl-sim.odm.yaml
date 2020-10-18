@@ -1,5 +1,5 @@
 # Configuration for the SPARC v2 system
-SPARC2-Fiber: {
+SPARC2-TC-Fiber: {
     class: Microscope,
     role: sparc2,
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
