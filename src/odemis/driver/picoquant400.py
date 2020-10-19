@@ -1624,7 +1624,7 @@ class FakeHHDLL(object):
 
     def HH_GetCountRate(self, i, channel, p_rate):
         rate = _deref(p_rate, c_int)
-        rate.value = random.randint(0, 5000)
+        rate.value = random.randint(0, 5)
 
     def HH_GetFlags(self, i, p_flags):
         flags = _deref(p_flags, c_int)
