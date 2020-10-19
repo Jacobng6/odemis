@@ -5,7 +5,7 @@ SPARC2-Fiber: {
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
                "Optical Path Properties",
                "Camera", "Spectrometer",
-               "Spectrograph",
+               "Spectrograph", "Fiber align", 
                "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
                "Lens1 Mover", "Lens2 Switch",

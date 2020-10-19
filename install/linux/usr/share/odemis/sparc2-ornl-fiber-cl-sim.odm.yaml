@@ -1,15 +1,15 @@
 # Configuration for the SPARC v2 system
-SPARC2-TC-Fiber: {
+SPARC2-Fiber: {
     class: Microscope,
     role: sparc2,
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
                "Optical Path Properties",
                "Camera", "Spectrometer",
-               "Spectrograph",
+               "Spectrograph", "Fiber align",
                "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
                "Lens1 Mover", "Lens2 Switch",
-               "Spectrometer Selector", "Fiber Detector"],
+               "Spectrometer Selector", "Fiber Detector", "Spec Filter Wheel"],
 }
 
 # Light (lamp with known spectrum)
