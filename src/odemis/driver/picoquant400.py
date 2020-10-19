@@ -1224,7 +1224,7 @@ class HH400(model.Detector):
                 self.GetSyncRate()
                 for i in range(0, self._numinput):
                     count = self.GetCountRate(i)
-                    logging.debug("Count rate for input %d: %d cnt/s" % i, count)
+                    logging.debug("Count rate for input %d: %d cnt/s", i, count)
                     # TODO JN: Log and print this count
                 # Check for warnings after getting count rates
                 warnings = self.GetWarnings()
