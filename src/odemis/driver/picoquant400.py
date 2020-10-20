@@ -425,6 +425,17 @@ class HH400(model.Detector):
         # TODO JN: Currently uses same settings for all channels
         # self.SetInputChannelEnable(channel, bool)
 
+        tresbase, binsteps = self.GetBaseResolution()
+        # tresbase is the base resolution in ps (default is 1 ps)
+        tres = self.GetResolution()
+        # tres is the current resolution in ps
+        pxd_ch = {(2 ** i) * (tresbase * 1e-12) for i in range(BINSTEPSMAX)}
+        # pxd_ch is an array of available resolutions
+        self.pixelDuration = model.FloatEnumerated(
+            tres * 1e-12, pxd_ch, unit="s", setter=self._setPixelDuration
+        )
+        self._setPixelDuraton(self.pixelDuration.value)
+
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
             self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
 
@@ -437,17 +448,6 @@ class HH400(model.Detector):
             self._setInputChannelOffset(i, self.inputChannelOffset.value)
 
         self._actuallen = self.SetHistoLen(MAXLENCODE)
-
-        tresbase, binsteps = self.GetBaseResolution()
-        # tresbase is the base resolution in ps (default is 1 ps)
-        tres = self.GetResolution()
-        # tres is the current resolution in ps
-        pxd_ch = {(2 ** i) * (tresbase * 1e-12) for i in range(BINSTEPSMAX)}
-        # pxd_ch is an array of available resolutions
-        self.pixelDuration = model.FloatEnumerated(
-            tres * 1e-12, pxd_ch, unit="s", setter=self._setPixelDuration
-        )
-        self._setPixelDuraton(self.pixelDuration.value)
 
         res = self._shape[:2]
         self.resolution = model.ResolutionVA(res, (res, res), readonly=True)
