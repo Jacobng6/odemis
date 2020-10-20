@@ -435,7 +435,8 @@ class HH400(model.Detector):
             tres * 1e-12, pxd_ch, unit="s", setter=self._setPixelDuration
         )
         self._setPixelDuraton(self.pixelDuration.value)
-        logging.warning("Pixel duration:" pixelDuration)
+        logging.warning("Pixel duration:")
+        logging.warning(self.pixelDuration)
 
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
             self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
