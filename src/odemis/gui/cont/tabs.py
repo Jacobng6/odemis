@@ -3565,7 +3565,6 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
-                logging.warning(photods) # JN
                 logging.debug("Using %s as fiber alignment detector", photods[0].name)
                 speccnts = acqstream.CameraCountStream("Spectrum average",
                                        photods[0],
@@ -3573,13 +3572,6 @@ class Sparc2AlignTab(Tab):
                                        emitter=None,
                                        detvas=get_local_vas(photods[0], main_data.hw_settings_config),
                                        )
-                logging.warning("JN photods:")
-                logging.warning(photods)                       
-                logging.warning("JN photods[0].data:")
-                logging.warning(photods[0].data)
-                logging.warning("JN speccnts:")
-                logging.warning(speccnts)
-                # TODO JN: Use the speccnts stream to display HH400 input channel count
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
                 # Special for the time-correlator: some of its settings also affect

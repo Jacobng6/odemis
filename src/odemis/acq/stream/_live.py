@@ -102,7 +102,7 @@ class LiveStream(Stream):
                          self)
             return
 
-        msg = "JN Subscribing to dataflow of component %s"
+        msg = "Subscribing to dataflow of component %s"
         logging.debug(msg, self._detector.name)
         if not self.should_update.value:
             logging.info("Trying to activate stream while it's not "
@@ -805,8 +805,6 @@ class CameraCountStream(CameraStream):
 
         # Mean is handy because it avoid very large numbers and still give
         # useful info if the CCD is saturated
-        logging.warning("JN data:")
-        logging.warning(data)
         return data.mean()
 
     def _append(self, count, date):

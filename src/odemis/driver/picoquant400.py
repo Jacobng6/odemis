@@ -306,7 +306,6 @@ class HH400(model.Detector):
          # TODO JN: Ignore shutters for our purposes
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector8 are valid. detector0 corresponds to the sync signal)
-        # TODO JN: Treat the sync signal as a child (detector)
 
         sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (detector0) (in V)
         sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (detector0) (in V)
@@ -366,7 +365,6 @@ class HH400(model.Detector):
 
         self.Calibrate()
 
-        # TODO JN: Make VA so we can change in GUI
         self.acqOffset = model.FloatContinuous(0, (OFFSETMIN * 1e-9, OFFSETMAX * 1e-9), unit="s",setter=self._setAcqOffset)
         self._setAcqOffset(self.acqOffset.value)
 
@@ -861,7 +859,6 @@ class HH400(model.Detector):
             chcount (unsigned int): pointer to an array of at least actuallen double words (32bit)
             where the histogram data can be stored
         """
-        # TODO JN
         clear_int = 1 if clear else 0
         buf = numpy.empty((1, self._actuallen), dtype=numpy.uint32)
         buf_ct = buf.ctypes.data_as(POINTER(c_uint32))
@@ -1074,8 +1071,8 @@ class HH400(model.Detector):
         offset = offset_ps * 1e-12  # convert the round-down in ps back to s
 
         # TODO JN: What is this doing? Just updates metadata
-        # tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
-        # self._metadata[model.MD_TIME_LIST] = tl
+        tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
+        self._metadata[model.MD_TIME_LIST] = tl
         return offset
 
     def _setAcqOffset(self, offset):
@@ -1226,7 +1223,6 @@ class HH400(model.Detector):
                 for i in range(0, self._numinput):
                     count = self.GetCountRate(i)
                     logging.debug("Count rate for input %d: %d cnt/s", i, count)
-                    # TODO JN: Log and print this count
                 # Check for warnings after getting count rates
                 warnings = self.GetWarnings()
                 if warnings != 0:
@@ -1387,6 +1383,7 @@ class HH400RawDetector(model.Detector):
 
         # send the new image (if anyone is interested)
         self.data.notify(img)
+        # TODO JN: Create DataArray with GetSyncRate
 
 
 class BasicDataFlow(model.DataFlow):
@@ -1625,7 +1622,7 @@ class FakeHHDLL(object):
 
     def HH_GetCountRate(self, i, channel, p_rate):
         rate = _deref(p_rate, c_int)
-        rate.value = random.randint(0, 5)
+        rate.value = random.randint(0, 50000)
 
     def HH_GetFlags(self, i, p_flags):
         flags = _deref(p_flags, c_int)
