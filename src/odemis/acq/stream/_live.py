@@ -805,7 +805,8 @@ class CameraCountStream(CameraStream):
 
         # Mean is handy because it avoid very large numbers and still give
         # useful info if the CCD is saturated
-        logging.warning("JN data: ", data)
+        logging.warning("JN data:")
+        logging.warning(data)
         return data.mean()
 
     def _append(self, count, date):
