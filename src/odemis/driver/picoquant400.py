@@ -447,7 +447,7 @@ class HH400(model.Detector):
         self.pixelDuration = model.FloatEnumerated(
             tres * 1e-12, pxd_ch, unit="s", setter=self._setPixelDuration
         )
-        self._setpixelDuraton(self.PixelDuration.value)
+        self._setPixelDuraton(self.pixelDuration.value)
 
         res = self._shape[:2]
         self.resolution = model.ResolutionVA(res, (res, res), readonly=True)
