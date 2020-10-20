@@ -102,7 +102,7 @@ class LiveStream(Stream):
                          self)
             return
 
-        msg = "Subscribing to dataflow of component %s"
+        msg = "JN Subscribing to dataflow of component %s"
         logging.debug(msg, self._detector.name)
         if not self.should_update.value:
             logging.info("Trying to activate stream while it's not "

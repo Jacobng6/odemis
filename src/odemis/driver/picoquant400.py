@@ -1221,7 +1221,8 @@ class HH400(model.Detector):
                 self._toggle_shutters(self._shutters.keys(), True)
 
                 # The demo code prints these out
-                self.GetSyncRate()
+                syncrate = self.GetSyncRate()
+                logging.debug("Sync rate: %d cnt/s", syncrate)
                 for i in range(0, self._numinput):
                     count = self.GetCountRate(i)
                     logging.debug("Count rate for input %d: %d cnt/s", i, count)
@@ -1455,8 +1456,8 @@ class FakeHHDLL(object):
         self._inputLevel = []
         self._inputZc = []
         self._inputOffset = []
-        self._syncRate = 0
-        self._syncPeriod = 0
+        self._syncRate = 50000
+        self._syncPeriod = 2000.0
 
         # start/ (expected) end time of the current acquisition (or None if not started)
         self._acq_start = None
