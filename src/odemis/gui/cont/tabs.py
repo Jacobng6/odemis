@@ -3563,7 +3563,6 @@ class Sparc2AlignTab(Tab):
                         continue
                     if hasattr(d, "data") and isinstance(d.data, model.DataFlowBase):
                         photods.append(d)
-            logging.warning("Jacob Ng")
 
             if photods:
                 logging.warning(photods) # JN
@@ -3574,8 +3573,9 @@ class Sparc2AlignTab(Tab):
                                        emitter=None,
                                        detvas=get_local_vas(photods[0], main_data.hw_settings_config),
                                        )
-                logging.warning(photods[0].data)
-                logging.warning(speccnts)
+                logging.warning("JN photods: " photods)                       
+                logging.warning("JN photods[0].data: " photods[0].data)
+                logging.warning("JN speccnts: " speccnts)
                 # TODO JN: Use the speccnts stream to display HH400 input channel count
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
