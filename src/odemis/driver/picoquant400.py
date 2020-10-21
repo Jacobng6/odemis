@@ -1050,8 +1050,8 @@ class HH400(model.Detector):
 
         # Update metadata
         pxd = self.GetResolution() * 1e-12  # ps -> s
-        tl = numpy.arange(self._shape[0]) * pxd + self.syncChannelOffset.value
-        self._metadata[model.MD_TIME_LIST] = tl
+        # tl = numpy.arange(self._shape[0]) * pxd + self.syncChannelOffset.value
+        # self._metadata[model.MD_TIME_LIST] = tl
         return pxd
 
     def _setSyncDiv(self, div):
@@ -1062,6 +1062,7 @@ class HH400(model.Detector):
         offset_ps = int(offset * 1e12)
         self.SetSyncChannelOffset(offset_ps)
         offset = offset_ps * 1e-12  # convert the round-down in ps back to s
+        # TODO JN: What is this doing? Just updates metadata
         tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
         self._metadata[model.MD_TIME_LIST] = tl
         return offset
@@ -1071,9 +1072,8 @@ class HH400(model.Detector):
         self.SetInputChannelOffset(channel, offset_ps)
         offset = offset_ps * 1e-12  # convert the round-down in ps back to s
 
-        # TODO JN: What is this doing? Just updates metadata
-        tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
-        self._metadata[model.MD_TIME_LIST] = tl
+        # tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
+        # self._metadata[model.MD_TIME_LIST] = tl
         return offset
 
     def _setAcqOffset(self, offset):
