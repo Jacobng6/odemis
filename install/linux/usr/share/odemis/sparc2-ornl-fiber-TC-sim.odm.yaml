@@ -8,7 +8,7 @@ SPARC2-TC-Fiber: {
                "Time Correlator", "Photon counter sync", "Photon counter signal",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
-               "Lens1 Mover", "Lens2 Switch", "Fiber Detector"],
+               "Lens1 Mover", "Lens2 Switch"],
 }
 
 # Light (lamp with known spectrum)
@@ -16,7 +16,7 @@ SPARC2-TC-Fiber: {
     class: light.Light,
     role: "brightlight",
     power_supplier: "Power Control Unit",
-    affects: ["Camera", "Spectrometer", "Fiber Detector", 
+    affects: ["Camera", "Spectrometer", 
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
@@ -57,6 +57,7 @@ SPARC2-TC-Fiber: {
     children: {
        scanner: "SEM E-beam",
        detector0: "SEM Detector",
+    #    detector2: "CL PMT",
     #    detector7: "Fiber Detector",
     }
 }
@@ -90,7 +91,7 @@ SPARC2-TC-Fiber: {
         dwellTime: 3.e-6, # s
         magnification: 100, # (ratio), start low for a big field of view
     },
-    affects: ["SEM Detector", "Camera", "Spectrometer", "Fiber Detector",
+    affects: ["SEM Detector", "Camera", "Spectrometer",
               "Time Correlator", "Photon counter sync", "Photon counter signal"] # affects the CCD in case of cathodoluminescence
 }
 
@@ -210,7 +211,7 @@ SPARC2-TC-Fiber: {
        # TODO: update for the Quanta
        rotation: -1.570796326795, # rad, 90° rotation between optical axis and SEM Y axis
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector",
+    affects: ["Camera", "Spectrometer",
               "Time Correlator", "Photon counter sync", "Photon counter signal"]
 }
 
@@ -262,7 +263,7 @@ SPARC2-TC-Fiber: {
             0.0: "off", # completely out of the path
         },
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector",
+    affects: ["Camera", "Spectrometer",
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
@@ -294,7 +295,7 @@ SPARC2-TC-Fiber: {
         # TODO put correct value
         FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
     },
-    affects: ["Fiber Detector", "Time Correlator", "Photon counter sync", "Photon counter signal"],
+    affects: ["Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
 # Mirror in Plate 2, selects between spectrometer and external optics (fiber output)
@@ -309,11 +310,11 @@ SPARC2-TC-Fiber: {
     metadata: {
         # Position of the mirror to select the external spectrometer (can be improved by user)
         FAV_POS_ACTIVE: {"x": 0.0126050192}, # m
-        FAV_POS_ACTIVE_DEST: ["Fiber align", "Fiber Detector"],
+        FAV_POS_ACTIVE_DEST: ["Fiber align", "Time Correlator", "Photon counter sync", "Photon counter signal"],
         FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
-    affects: ["Camera", "Spectrometer", "Fiber Detector", "Fiber align",
+    affects: ["Camera", "Spectrometer", "Fiber align",
               "Time Correlator", "Photon counter sync", "Photon counter signal"],
 }
 
@@ -356,11 +357,11 @@ SPARC2-TC-Fiber: {
     role: photo-detector0, # det0, to be shown as main graph in GUI
 }
 
-"Fiber Detector": {
-    class: spectrometer.CompositedSpectrometer,
-    role: spectrometer1,
-    children: {detector: "Camera", spectrograph: "Spectrograph"},
-}
+# "Fiber Detector": {
+#     class: spectrometer.CompositedSpectrometer,
+#     role: spectrometer1,
+#     children: {detector: "Camera", spectrograph: "Spectrograph"},
+# }
 
 # Controller for moving the 'Redux' stage
 # DIP must be configured with address 4 (= 0010000)
