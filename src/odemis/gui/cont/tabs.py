@@ -3161,7 +3161,6 @@ class SparcAlignTab(Tab):
 
         return None
 
-
 class Sparc2AlignTab(Tab):
     """
     Tab for the mirror/fiber/lens/streak-camera alignment on the SPARCv2. Note that the basic idea
@@ -3574,7 +3573,6 @@ class Sparc2AlignTab(Tab):
                                        )
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
-
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3592,34 +3590,14 @@ class Sparc2AlignTab(Tab):
                 self._speccnt_stream = speccnts
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
+                # TODO JN:
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    logging.debug("Using %s as second fiber alignment detector", photods[1].name)    
-
                     self._fbdet2 = photods[1]
                     _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
                     self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det2_cnt_ctrl.SetFont(f)
-
-                    # self._fbdet1 = photods[0]
-                    # _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
-                    # self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    # f = self._det1_cnt_ctrl.GetFont()
-                    # f.PointSize = 12
-                    # self._det1_cnt_ctrl.SetFont(f)
-
-                    # synccnts = acqstream.CameraCountStream("Sync average",
-                    #                    photods[1],
-                    #                    photods[1].data,
-                    #                    emitter=None,
-                    #                    detvas=get_local_vas(photods[1], main_data.hw_settings_config),
-                    #                    )
-                    # logging.warning(synccnts)
-
-                    # speccnt_spe = self._stream_controller.addStream(synccnts,
-                    #                 add_to_view=self.panel.vp_align_fiber.view)
-
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
@@ -3683,6 +3661,7 @@ class Sparc2AlignTab(Tab):
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
     def _on_fbdet1_should_update(self, should_update):
+        # TODO JN:
         if should_update:
             self._fbdet2.data.subscribe(self._on_fbdet2_data)
         else:
@@ -4541,7 +4520,6 @@ class Sparc2AlignTab(Tab):
                 return 5
 
         return None
-
 
 class TabBarController(object):
     def __init__(self, tab_defs, main_frame, main_data):
