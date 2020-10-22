@@ -1379,12 +1379,9 @@ class HH400RawDetector(model.Detector):
 
         # Read data and make it a DataArray
         if self._channel == 0:
-            logging.warning("JN: Sync")
             d = self.parent.GetSyncRate()
         else:
-            logging.warning("JN: signal")
             d = self.parent.GetCountRate(self._channel)
-        # d = self.parent.GetCountRate(self._channel)
         nd = numpy.array([d], dtype=numpy.int)
         img = model.DataArray(nd, metadata)
 
