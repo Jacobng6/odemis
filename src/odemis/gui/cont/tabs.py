@@ -3551,8 +3551,6 @@ class Sparc2AlignTab(Tab):
             # First try some known, good and reliable detectors
             for d in (main_data.spectrometers + main_data.photo_ds):
                 if d is not None and d.name in fbaffects:
-                    logging.warning("JN")
-                    logging.warning(d)
                     photods.append(d)
 
             if not photods:
@@ -3605,12 +3603,12 @@ class Sparc2AlignTab(Tab):
                     f.PointSize = 12
                     self._det2_cnt_ctrl.SetFont(f)
 
-                    self._fbdet1 = photods[0]
-                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
-                    self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det1_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det1_cnt_ctrl.SetFont(f)
+                    # self._fbdet1 = photods[0]
+                    # _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
+                    # self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    # f = self._det1_cnt_ctrl.GetFont()
+                    # f.PointSize = 12
+                    # self._det1_cnt_ctrl.SetFont(f)
 
                     synccnts = acqstream.CameraCountStream("Sync average",
                                        photods[1],
@@ -3620,8 +3618,8 @@ class Sparc2AlignTab(Tab):
                                        )
                     logging.warning(synccnts)
 
-                    speccnt_spe = self._stream_controller.addStream(synccnts,
-                                    add_to_view=self.panel.vp_align_fiber.view)
+                    # speccnt_spe = self._stream_controller.addStream(synccnts,
+                    #                 add_to_view=self.panel.vp_align_fiber.view)
 
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
