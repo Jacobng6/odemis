@@ -3551,6 +3551,8 @@ class Sparc2AlignTab(Tab):
             # First try some known, good and reliable detectors
             for d in (main_data.spectrometers + main_data.photo_ds):
                 if d is not None and d.name in fbaffects:
+                    logging.warning("JN")
+                    logging.warning(d)
                     photods.append(d)
 
             if not photods:
@@ -3596,6 +3598,13 @@ class Sparc2AlignTab(Tab):
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     logging.debug("Using %s as second fiber alignment detector", photods[1].name)    
 
+                    self._fbdet2 = photods[1]
+                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
+                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det2_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det2_cnt_ctrl.SetFont(f)
+
                     self._fbdet1 = photods[0]
                     _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
@@ -3603,18 +3612,16 @@ class Sparc2AlignTab(Tab):
                     f.PointSize = 12
                     self._det1_cnt_ctrl.SetFont(f)
 
-                    speccnts_2 = acqstream.CameraCountStream("Sync average",
+                    synccnts = acqstream.CameraCountStream("Sync average",
                                        photods[1],
                                        photods[1].data,
                                        emitter=None,
                                        detvas=get_local_vas(photods[1], main_data.hw_settings_config),
                                        )
-                    self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
-                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det2_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det2_cnt_ctrl.SetFont(f)
+                    logging.warnning(synccnts)
+
+                    speccnt_spe = self._stream_controller.addStream(synccnts,
+                                    add_to_view=self.panel.vp_align_fiber.view)
 
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
