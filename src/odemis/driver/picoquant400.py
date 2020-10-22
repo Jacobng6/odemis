@@ -1377,15 +1377,14 @@ class HH400RawDetector(model.Detector):
         metadata[model.MD_ACQ_DATE] = time.time()
         metadata[model.MD_DWELL_TIME] = 100e-3  # s
 
-        logging.warning("JN")
-        logging.warning(self)
-
         # Read data and make it a DataArray
-        # if self == 
-        #     d = self.parent.GetSyncRate()
-        # else:
-        #     d = self.parent.GetCountRate(self._channel)
-        d = self.parent.GetCountRate(self._channel)
+        if self == "Photon counter sync"
+            logging.warning("JN: Sync")
+            d = self.parent.GetSyncRate()
+        else:
+            logging.warning("JN: signal")
+            d = self.parent.GetCountRate(self._channel)
+        # d = self.parent.GetCountRate(self._channel)
         nd = numpy.array([d], dtype=numpy.int)
         img = model.DataArray(nd, metadata)
 
