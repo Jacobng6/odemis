@@ -3565,8 +3565,7 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
-                # logging.debug("Using %s as fiber alignment detector", photods[0].name)
-                logging.debug("JN: Using %s as fiber alignment detector", photods[0].name)
+                logging.debug("Using %s as fiber alignment detector", photods[0].name)
                 speccnts = acqstream.CameraCountStream("Spectrum average",
                                        photods[0],
                                        photods[0].data,
@@ -3576,13 +3575,6 @@ class Sparc2AlignTab(Tab):
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
 
-                # TODO JN                    
-                self._fbdet1 = photods[0]
-                _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
-                self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                f = self._det1_cnt_ctrl.GetFont()
-                f.PointSize = 12
-                self._det1_cnt_ctrl.SetFont(f)
 
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
@@ -3594,21 +3586,36 @@ class Sparc2AlignTab(Tab):
                                                       main_data.hw_settings_config["time-correlator"].get("syncDiv")
                                                       )
 
-                if main_data.tc_od_filter:
-                    speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
-                    speccnt_spe.add_axis_entry("band", main_data.tc_filter)
-                speccnt_spe.stream_panel.flatten()
-                self._speccnt_stream = speccnts
-                speccnts.should_update.subscribe(self._on_ccd_stream_play)
+                # if main_data.tc_od_filter:
+                #     speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
+                #     speccnt_spe.add_axis_entry("band", main_data.tc_filter)
+                # speccnt_spe.stream_panel.flatten()
+                # self._speccnt_stream = speccnts
+                # speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    logging.debug("JN: Using %s as second fiber alignment detector", photods[1].name)
+                    logging.debug("Using %s as second fiber alignment detector", photods[1].name)    
+
+                    self._fbdet1 = photods[0]
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
+                    self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det1_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det1_cnt_ctrl.SetFont(f)
+
+                    speccnts_2 = acqstream.CameraCountStream("Sync average",
+                                       photods[1],
+                                       photods[1].data,
+                                       emitter=None,
+                                       detvas=get_local_vas(photods[1], main_data.hw_settings_config),
+                                       )
                     self._fbdet2 = photods[1]
                     _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
                     self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det2_cnt_ctrl.SetFont(f)
+
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
