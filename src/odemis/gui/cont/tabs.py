@@ -3575,6 +3575,15 @@ class Sparc2AlignTab(Tab):
                                        )
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
+
+                # TODO JN                    
+                self._fbdet1 = photods[0]
+                _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1", "", readonly=True)
+                self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                f = self._det1_cnt_ctrl.GetFont()
+                f.PointSize = 12
+                self._det1_cnt_ctrl.SetFont(f)
+
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3595,7 +3604,7 @@ class Sparc2AlignTab(Tab):
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     logging.debug("JN: Using %s as second fiber alignment detector", photods[1].name)
                     self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
+                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
                     self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
