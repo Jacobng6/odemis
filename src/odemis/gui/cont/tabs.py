@@ -3597,7 +3597,7 @@ class Sparc2AlignTab(Tab):
                     logging.debug("Using %s as second fiber alignment detector", photods[1].name)    
 
                     self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
+                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
                     self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
@@ -3610,13 +3610,13 @@ class Sparc2AlignTab(Tab):
                     # f.PointSize = 12
                     # self._det1_cnt_ctrl.SetFont(f)
 
-                    synccnts = acqstream.CameraCountStream("Sync average",
-                                       photods[1],
-                                       photods[1].data,
-                                       emitter=None,
-                                       detvas=get_local_vas(photods[1], main_data.hw_settings_config),
-                                       )
-                    logging.warning(synccnts)
+                    # synccnts = acqstream.CameraCountStream("Sync average",
+                    #                    photods[1],
+                    #                    photods[1].data,
+                    #                    emitter=None,
+                    #                    detvas=get_local_vas(photods[1], main_data.hw_settings_config),
+                    #                    )
+                    # logging.warning(synccnts)
 
                     # speccnt_spe = self._stream_controller.addStream(synccnts,
                     #                 add_to_view=self.panel.vp_align_fiber.view)
