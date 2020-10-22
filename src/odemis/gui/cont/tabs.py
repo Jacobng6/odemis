@@ -3618,7 +3618,7 @@ class Sparc2AlignTab(Tab):
                                        emitter=None,
                                        detvas=get_local_vas(photods[1], main_data.hw_settings_config),
                                        )
-                    logging.warnning(synccnts)
+                    logging.warning(synccnts)
 
                     speccnt_spe = self._stream_controller.addStream(synccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
