@@ -1378,9 +1378,7 @@ class HH400RawDetector(model.Detector):
         metadata[model.MD_DWELL_TIME] = 100e-3  # s
 
         # Read data and make it a DataArray
-        logging.warning(self)
-        logging.warning(dir(self))
-        if self == "Photon counter sync":
+        if self._channel == 0:
             logging.warning("JN: Sync")
             d = self.parent.GetSyncRate()
         else:
