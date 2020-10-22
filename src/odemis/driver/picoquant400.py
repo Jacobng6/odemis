@@ -1377,20 +1377,20 @@ class HH400RawDetector(model.Detector):
         metadata[model.MD_ACQ_DATE] = time.time()
         metadata[model.MD_DWELL_TIME] = 100e-3  # s
 
+        logging.warning("JN")
+        logging.warning(self)
+
         # Read data and make it a DataArray
+        # if self == 
+        #     d = self.parent.GetSyncRate()
+        # else:
+        #     d = self.parent.GetCountRate(self._channel)
         d = self.parent.GetCountRate(self._channel)
         nd = numpy.array([d], dtype=numpy.int)
         img = model.DataArray(nd, metadata)
 
         # send the new image (if anyone is interested)
         self.data.notify(img)
-
-        # TODO JN: Create DataArray with GetSyncRate
-        # d2 = self.parent.GetSyncRate()
-        # nd2 = numpy.array([d2], dtype=numpy.int)
-        # img_2 = model.DataArray(nd2, metadata) 
-        # self.data.notify(img_2)
-
 
 class BasicDataFlow(model.DataFlow):
     def __init__(self, detector):

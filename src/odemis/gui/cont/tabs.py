@@ -3575,7 +3575,6 @@ class Sparc2AlignTab(Tab):
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
 
-
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3586,12 +3585,12 @@ class Sparc2AlignTab(Tab):
                                                       main_data.hw_settings_config["time-correlator"].get("syncDiv")
                                                       )
 
-                # if main_data.tc_od_filter:
-                #     speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
-                #     speccnt_spe.add_axis_entry("band", main_data.tc_filter)
-                # speccnt_spe.stream_panel.flatten()
-                # self._speccnt_stream = speccnts
-                # speccnts.should_update.subscribe(self._on_ccd_stream_play)
+                if main_data.tc_od_filter:
+                    speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
+                    speccnt_spe.add_axis_entry("band", main_data.tc_filter)
+                speccnt_spe.stream_panel.flatten()
+                self._speccnt_stream = speccnts
+                speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     logging.debug("Using %s as second fiber alignment detector", photods[1].name)    
