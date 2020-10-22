@@ -3590,9 +3590,10 @@ class Sparc2AlignTab(Tab):
                 self._speccnt_stream = speccnts
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
-                # TODO JN:
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     self._fbdet1 = photods[0]
+                    # TODO JN: Messy naming! 
+                    # TODO JN: Extend to > 2 detectors?
                     _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det1_cnt_ctrl.GetFont()
@@ -3669,14 +3670,13 @@ class Sparc2AlignTab(Tab):
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
     def _on_fbdet0_should_update(self, should_update):
-        # TODO JN:
+        # TODO JN: Messy naming!
         if should_update:
             self._fbdet1.data.subscribe(self._on_fbdet1_data)
         else:
             self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
 
     def _on_fbdet1_should_update(self, should_update):
-        # TODO JN:
         if should_update:
             self._fbdet2.data.subscribe(self._on_fbdet2_data)
         else:
