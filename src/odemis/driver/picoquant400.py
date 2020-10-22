@@ -1386,12 +1386,10 @@ class HH400RawDetector(model.Detector):
         self.data.notify(img)
 
         # TODO JN: Create DataArray with GetSyncRate
-
-        # Read data and make it a DataArray
-        d2 = self.parent.GetSyncRate()
-        nd2 = numpy.array([d2], dtype=numpy.int)
-        img_2 = model.DataArray(nd2, metadata) 
-        self.data.notify(img_2)
+        # d2 = self.parent.GetSyncRate()
+        # nd2 = numpy.array([d2], dtype=numpy.int)
+        # img_2 = model.DataArray(nd2, metadata) 
+        # self.data.notify(img_2)
 
 
 class BasicDataFlow(model.DataFlow):

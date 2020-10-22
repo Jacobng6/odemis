@@ -3565,7 +3565,8 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
-                logging.debug("Using %s as fiber alignment detector", photods[0].name)
+                # logging.debug("Using %s as fiber alignment detector", photods[0].name)
+                logging.debug("JN: Using %s as fiber alignment detector", photods[0].name)
                 speccnts = acqstream.CameraCountStream("Spectrum average",
                                        photods[0],
                                        photods[0].data,
@@ -3592,6 +3593,7 @@ class Sparc2AlignTab(Tab):
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
+                    logging.debug("JN: Using %s as second fiber alignment detector", photods[1].name)
                     self._fbdet2 = photods[1]
                     _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
                     self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
