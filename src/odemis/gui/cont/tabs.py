@@ -3598,6 +3598,7 @@ class Sparc2AlignTab(Tab):
                     f = self._det1_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det1_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet0_should_update)
 
                     self._fbdet2 = photods[1]
                     _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
@@ -3667,12 +3668,23 @@ class Sparc2AlignTab(Tab):
         if not main_data.ebeamControlsMag:
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
+    def _on_fbdet0_should_update(self, should_update):
+        # TODO JN:
+        if should_update:
+            self._fbdet1.data.subscribe(self._on_fbdet1_data)
+        else:
+            self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
+
     def _on_fbdet1_should_update(self, should_update):
         # TODO JN:
         if should_update:
             self._fbdet2.data.subscribe(self._on_fbdet2_data)
         else:
             self._fbdet2.data.unsubscribe(self._on_fbdet2_data)
+
+    @wxlimit_invocation(0.5)
+    def _on_fbdet1_data(self, df, data):
+        self._det1_cnt_ctrl.SetValue("%s" % data[-1])
 
     @wxlimit_invocation(0.5)
     def _on_fbdet2_data(self, df, data):
