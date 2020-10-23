@@ -3573,6 +3573,7 @@ class Sparc2AlignTab(Tab):
                                        )
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
+
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3592,14 +3593,13 @@ class Sparc2AlignTab(Tab):
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     self._fbdet1 = photods[0]
-                    # TODO JN: Messy naming! 
                     # TODO JN: Extend to > 2 detectors?
                     _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det1_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det1_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet0_should_update)
+                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
 
                     self._fbdet2 = photods[1]
                     _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
@@ -3607,7 +3607,7 @@ class Sparc2AlignTab(Tab):
                     f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det2_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                    speccnts.should_update.subscribe(self._on_fbdet2_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
 
@@ -3669,14 +3669,13 @@ class Sparc2AlignTab(Tab):
         if not main_data.ebeamControlsMag:
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
-    def _on_fbdet0_should_update(self, should_update):
-        # TODO JN: Messy naming!
+    def _on_fbdet1_should_update(self, should_update):
         if should_update:
             self._fbdet1.data.subscribe(self._on_fbdet1_data)
         else:
             self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
 
-    def _on_fbdet1_should_update(self, should_update):
+    def _on_fbdet2_should_update(self, should_update):
         if should_update:
             self._fbdet2.data.subscribe(self._on_fbdet2_data)
         else:
@@ -3908,6 +3907,7 @@ class Sparc2AlignTab(Tab):
             self.panel.pnl_streak.Enable(False)
         elif mode == "fiber-align":
             self.tab_data_model.focussedView.value = self.panel.vp_align_fiber.view
+            logging.warning(self.tab_data_model.focussedView.value)
             if self._speccnt_stream:
                 self._speccnt_stream.should_update.value = True
             if self._mirror_settings_controller:
@@ -3917,6 +3917,7 @@ class Sparc2AlignTab(Tab):
             self.panel.pnl_focus.Enable(False)
             self.panel.pnl_moi_settings.Show(False)
             self.panel.pnl_fibaligner.Enable(True)
+            # TODO JN: Log fiber position with button moves
             # Disable the buttons until the fiber box is ready
             self.panel.btn_m_fibaligner_x.Enable(False)
             self.panel.btn_p_fibaligner_x.Enable(False)
@@ -4255,6 +4256,7 @@ class Sparc2AlignTab(Tab):
                 btn = self.panel.btn_autofocus
                 gauge = self.panel.gauge_autofocus
             elif align_mode == "fiber-align":
+                # TODO JN?
                 focus_mode = "spec-fiber-focus"
                 ss = []  # No stream to play
                 btn = self.panel.btn_fib_autofocus
@@ -4470,8 +4472,11 @@ class Sparc2AlignTab(Tab):
             return
 
         # Update the fibaligner with the Y axis, if it supports it
+        # TODO JN?
         fiba = self.tab_data_model.main.fibaligner
         fib_fav_pos = fiba.getMetadata().get(model.MD_FAV_POS_ACTIVE, {})
+        logging.warning("JN")
+        logging.warning(fib_fav_pos)
 
         # If old hardware, without FAV_POS: just do nothing
         if fib_fav_pos and "y" in fib_fav_pos:
