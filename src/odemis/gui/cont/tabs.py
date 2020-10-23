@@ -3917,7 +3917,6 @@ class Sparc2AlignTab(Tab):
             self.panel.pnl_focus.Enable(False)
             self.panel.pnl_moi_settings.Show(False)
             self.panel.pnl_fibaligner.Enable(True)
-            # TODO JN: Log fiber position with button moves
             # Disable the buttons until the fiber box is ready
             self.panel.btn_m_fibaligner_x.Enable(False)
             self.panel.btn_p_fibaligner_x.Enable(False)
@@ -4458,7 +4457,7 @@ class Sparc2AlignTab(Tab):
 
         # Save the axis position as the "calibrated" one
         ss = self.tab_data_model.main.spec_sel
-        logging.debug("Updating the active fiber X position to %s", pos)
+        logging.info("Updating the active fiber X position to %s", pos)
         ss.updateMetadata({model.MD_FAV_POS_ACTIVE: pos})
 
     def _onFiberPos(self, pos):
@@ -4472,16 +4471,13 @@ class Sparc2AlignTab(Tab):
             return
 
         # Update the fibaligner with the Y axis, if it supports it
-        # TODO JN?
         fiba = self.tab_data_model.main.fibaligner
         fib_fav_pos = fiba.getMetadata().get(model.MD_FAV_POS_ACTIVE, {})
-        logging.warning("JN")
-        logging.warning(fib_fav_pos)
 
         # If old hardware, without FAV_POS: just do nothing
         if fib_fav_pos and "y" in fib_fav_pos:
             fib_fav_pos["y"] = pos["y"]
-            logging.debug("Updating the active fiber Y position to %s", fib_fav_pos)
+            logging.info("Updating the active fiber Y position to %s", fib_fav_pos)
             fiba.updateMetadata({model.MD_FAV_POS_ACTIVE: fib_fav_pos})
 
     def Show(self, show=True):
