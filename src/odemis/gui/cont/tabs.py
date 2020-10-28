@@ -3570,7 +3570,7 @@ class Sparc2AlignTab(Tab):
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     # Assuming photods[0] is sync signal and photods[>0] are detectors
 
-                    logging.debug("JN: Using %s as fiber alignment detector", photods[1].name)
+                    logging.debug("Using %s as fiber alignment detector", photods[1].name)
                     speccnts = acqstream.CameraCountStream("Spectrum average",
                                         photods[1],
                                         photods[1].data,
@@ -3580,7 +3580,7 @@ class Sparc2AlignTab(Tab):
                     speccnt_spe = self._stream_controller.addStream(speccnts,
                                         add_to_view=self.panel.vp_align_fiber.view)
 
-                    logging.debug("JN: Also using %s as fiber alignment detector", photods[0].name)
+                    # logging.debug("Also using %s as fiber alignment detector", photods[0].name)
                     self._fbdet0 = photods[0]
                     _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
                     self._det0_cnt_ctrl.SetForegroundColour("#FFFFFF")
@@ -3591,7 +3591,7 @@ class Sparc2AlignTab(Tab):
 
                     # # TODO JN: Extend to > 2 detectors
                     self._fbdet1 = photods[1]
-                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input 1", "", readonly=True)
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input 1 (Plot)", "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det1_cnt_ctrl.GetFont()
                     f.PointSize = 12
@@ -3684,27 +3684,25 @@ class Sparc2AlignTab(Tab):
     def _on_fbdet0_should_update(self, should_update):
         if should_update:
             self._fbdet0.data.subscribe(self._on_fbdet0_data)
-            logging.debug("JN: Fiber detector 0 (sync) subscribe")
         else:
             self._fbdet0.data.unsubscribe(self._on_fbdet0_data)
 
     def _on_fbdet1_should_update(self, should_update):
         if should_update:
             self._fbdet1.data.subscribe(self._on_fbdet1_data)
-            logging.debug("JN: Fiber detector 1 (input) subscribe")
         else:
             self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
 
     @wxlimit_invocation(0.5)
     def _on_fbdet0_data(self, df, data):
         self._det0_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("JN: Fiber detector 0 (sync) data: %d", data[-1])
+        # logging.debug("Fiber detector 0 (sync) data: %d", data[-1])
 
 
     @wxlimit_invocation(0.5)
     def _on_fbdet1_data(self, df, data):
         self._det1_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("JN: Fiber detector 1 (input) data: %d", data[-1])
+        # logging.debug("Fiber detector 1 (input) data: %d", data[-1])
 
     def _layoutModeButtons(self):
         """
