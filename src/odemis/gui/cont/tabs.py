@@ -3591,17 +3591,18 @@ class Sparc2AlignTab(Tab):
                     speccnt_spe.add_axis_entry("band", main_data.tc_filter)
                 speccnt_spe.stream_panel.flatten()
                 self._speccnt_stream = speccnts
-                speccnts.should_update.subscribe(self._on_ccd_stream_play)
+                # speccnts.should_update.subscribe(self._on_ccd_stream_play)
+                speccnts.should_update.subscribe(self._on_fbdet1_should_update)
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     self._fbdet1 = photods[0]
                     # # TODO JN: Extend to > 2 detectors?
-                    # _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
-                    # self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    # f = self._det1_cnt_ctrl.GetFont()
-                    # f.PointSize = 12
-                    # self._det1_cnt_ctrl.SetFont(f)
-                    # speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
+                    self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det1_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det1_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
 
                     logging.debug("JN: Also using %s as fiber alignment detector", photods[1].name)
                     self._fbdet2 = photods[1]
@@ -3689,13 +3690,13 @@ class Sparc2AlignTab(Tab):
     @wxlimit_invocation(0.5)
     def _on_fbdet1_data(self, df, data):
         self._det1_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("Fiber detector 1 (input) data: ", data[-1])
+        logging.debug("JN: Fiber detector 1 (input) data: %d", data[-1])
 
 
     @wxlimit_invocation(0.5)
     def _on_fbdet2_data(self, df, data):
         self._det2_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("Fiber detector 2 (sync) data: ", data[-1])
+        logging.debug("JN: Fiber detector 2 (sync) data: %d", data[-1])
 
     def _layoutModeButtons(self):
         """
