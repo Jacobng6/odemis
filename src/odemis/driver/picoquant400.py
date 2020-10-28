@@ -1334,6 +1334,7 @@ class HH400RawDetector(model.Detector):
         """
         if channel == 0:
             self._channel = "Sync"
+        # TODO JN: Confusion with zero-indexing
         else:
             self._channel = channel - 1
         super(HH400RawDetector, self).__init__(name, role, parent=parent, **kwargs)
