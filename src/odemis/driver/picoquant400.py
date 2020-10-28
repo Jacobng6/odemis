@@ -1220,10 +1220,10 @@ class HH400(model.Detector):
 
                 # The demo code prints these out
                 syncrate = self.GetSyncRate()
-                logging.debug("JN: Sync rate: %d cnt/s", syncrate)
+                # logging.debug("Sync rate: %d cnt/s", syncrate)
                 for i in range(0, self._numinput):
                     count = self.GetCountRate(i)
-                    logging.debug("JN: Count rate for input %d: %d cnt/s", i, count)
+                    # logging.debug("Count rate for input %d: %d cnt/s", i, count)
                 # Check for warnings after getting count rates
                 warnings = self.GetWarnings()
                 if warnings != 0:
@@ -1382,7 +1382,6 @@ class HH400RawDetector(model.Detector):
             d = self.parent.GetSyncRate()
         else:
             d = self.parent.GetCountRate(self._channel)
-        logging.debug("JN: Count rate for input %d: %d cnt/s", self._channel, d)
         nd = numpy.array([d], dtype=numpy.int)
         img = model.DataArray(nd, metadata)
 

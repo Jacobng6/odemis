@@ -5,7 +5,7 @@ SPARC2-TC-Fiber: {
     children: ["SEM E-beam", "SEM Detector", "Calibration Light",
                "Optical Path Properties", "Spectrometer Selector",
                "Camera", "Spectrometer", "Spectrograph", "Fiber align",
-               "Time Correlator", "Photon counter sync", "Photon counter signal",
+               "Time Correlator", "Photon counter sync", "Photon counter signal 1",
                "Spec Filter Wheel", "Spec CCD Flipper", "Spectrograph focus",
                "Mirror Actuators", "Mirror Actuators in XY referential", "Slit",
                "Lens1 Mover", "Lens2 Switch"],
@@ -17,7 +17,7 @@ SPARC2-TC-Fiber: {
     role: "brightlight",
     power_supplier: "Power Control Unit",
     affects: ["Camera", "Spectrometer", 
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
+              "Time Correlator", "Photon counter sync", "Photon counter signal 1"],
 }
 
 "Power Control Unit": {
@@ -92,7 +92,7 @@ SPARC2-TC-Fiber: {
         magnification: 100, # (ratio), start low for a big field of view
     },
     affects: ["SEM Detector", "Camera", "Spectrometer",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"] # affects the CCD in case of cathodoluminescence
+              "Time Correlator", "Photon counter sync", "Photon counter signal 1"] # affects the CCD in case of cathodoluminescence
 }
 
 # Must be connected on AI1/AI9 (differential)
@@ -212,7 +212,7 @@ SPARC2-TC-Fiber: {
        rotation: -1.570796326795, # rad, 90° rotation between optical axis and SEM Y axis
     },
     affects: ["Camera", "Spectrometer",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"]
+              "Time Correlator", "Photon counter sync", "Photon counter signal 1"]
 }
 
 # Controller for the motors moving the various parts of the optical box
@@ -264,7 +264,7 @@ SPARC2-TC-Fiber: {
         },
     },
     affects: ["Camera", "Spectrometer",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
+              "Time Correlator", "Photon counter sync", "Photon counter signal 1"],
 }
 
 # Control the slit position to either fully-open or small (dependent on the spectrometer slit-in)
@@ -295,7 +295,7 @@ SPARC2-TC-Fiber: {
         # TODO put correct value
         FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
     },
-    affects: ["Time Correlator", "Photon counter sync", "Photon counter signal"],
+    affects: ["Time Correlator", "Photon counter sync", "Photon counter signal 1"],
 }
 
 # Mirror in Plate 2, selects between spectrometer and external optics (fiber output)
@@ -310,12 +310,12 @@ SPARC2-TC-Fiber: {
     metadata: {
         # Position of the mirror to select the external spectrometer (can be improved by user)
         FAV_POS_ACTIVE: {"x": 0.0126050192}, # m
-        FAV_POS_ACTIVE_DEST: ["Fiber align", "Time Correlator", "Photon counter sync", "Photon counter signal"],
+        FAV_POS_ACTIVE_DEST: ["Fiber align", "Time Correlator", "Photon counter sync", "Photon counter signal 1"],
         FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
     },
     affects: ["Camera", "Spectrometer", "Fiber align",
-              "Time Correlator", "Photon counter sync", "Photon counter signal"],
+              "Time Correlator", "Photon counter sync", "Photon counter signal 1"],
 }
 
 "Time Correlator": {
@@ -337,7 +337,7 @@ SPARC2-TC-Fiber: {
     # These children allow to have access to the raw data on the PMTs
     children: {
         "detector0": "Photon counter sync",
-        "detector1": "Photon counter signal",
+        "detector1": "Photon counter signal 1",
     },
     # dependencies: {
     #     "shutter0": "Shutter 0",
@@ -351,7 +351,7 @@ SPARC2-TC-Fiber: {
     role: photo-detector0,
 }
 
-"Photon counter signal": {
+"Photon counter signal 1": {
     # Internal child of "Time Correlator", so no class
     creator: "Time Correlator", 
     # role: photo-detector0, # det0, to be shown as main graph in GUI
