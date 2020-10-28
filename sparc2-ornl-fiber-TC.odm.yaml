@@ -296,7 +296,7 @@ SPARC2-TC-Fiber: {
     metadata: {
         # Default position of the lens (can be improved by user)
         # TODO put correct value
-        FAV_POS_ACTIVE: {"y": 0.00123944274}, # m
+        FAV_POS_ACTIVE: {"y": 0.00039948206}, # m
     },
     affects: ["Time Correlator", "Photon counter sync", "Photon counter signal 1"],
 }
@@ -312,7 +312,7 @@ SPARC2-TC-Fiber: {
     },
     metadata: {
         # Position of the mirror to select the external spectrometer (can be improved by user)
-        FAV_POS_ACTIVE: {"x": 0.0126050192}, # m
+        FAV_POS_ACTIVE: {"x": 0.0124550216}, # m
         FAV_POS_ACTIVE_DEST: ["Fiber align", "Time Correlator", "Photon counter sync", "Photon counter signal 1"],
         FAV_POS_DEACTIVE: {"x": 0.0451106487}, # m
         FAV_POS_DEACTIVE_DEST: ["Camera", "Spectrometer"], # m
