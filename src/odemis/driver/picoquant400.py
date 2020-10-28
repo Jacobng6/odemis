@@ -1332,7 +1332,10 @@ class HH400RawDetector(model.Detector):
         """
         channel (int): input channel index 0..nchannels-1
         """
-        self._channel = channel
+        if channel == 0:
+            self._channel = "Sync"
+        else:
+            self._channel = channel - 1
         super(HH400RawDetector, self).__init__(name, role, parent=parent, **kwargs)
 
         self._shape = (2 ** 31,)  # only one point, with (32 bits) int size
@@ -1378,7 +1381,7 @@ class HH400RawDetector(model.Detector):
         metadata[model.MD_DWELL_TIME] = 100e-3  # s
 
         # Read data and make it a DataArray
-        if self._channel == 0:
+        if self._channel == "Sync":
             d = self.parent.GetSyncRate()
         else:
             d = self.parent.GetCountRate(self._channel)
