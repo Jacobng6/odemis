@@ -3542,7 +3542,8 @@ class Sparc2AlignTab(Tab):
 
         # chronograph of spectrometer if "fiber-align" mode is present
         self._speccnt_stream = None
-        self._fbdet2 = None
+        self._fbdet0 = None
+        self._fbdet1 = None
         if "fiber-align" in tab_data.align_mode.choices:
             # TODO JN: This isn't properly reading input and sync
 
@@ -3551,8 +3552,12 @@ class Sparc2AlignTab(Tab):
             fbaffects = main_data.fibaligner.affects.value
             # First try some known, good and reliable detectors
             for d in (main_data.spectrometers + main_data.photo_ds):
+                logging.debug("JN Spectrometers: %s", main_data.spectrometers)
+                logging.debug("JN photo_ds: %s", main_data.photo_ds)
                 if d is not None and d.name in fbaffects:
                     photods.append(d)
+                    logging.debug("JN photods name: %s", d.name)
+                    logging.debug("JN fbaffects: %s", fbaffects)
 
             if not photods:
                 # Take the first detector
@@ -3592,26 +3597,26 @@ class Sparc2AlignTab(Tab):
                 speccnt_spe.stream_panel.flatten()
                 self._speccnt_stream = speccnts
                 # speccnts.should_update.subscribe(self._on_ccd_stream_play)
-                speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                speccnts.should_update.subscribe(self._on_fbdet0_should_update)
 
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    self._fbdet1 = photods[0]
+                    self._fbdet0 = photods[0]
                     # # TODO JN: Extend to > 2 detectors?
-                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
+                    _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input", "", readonly=True)
+                    self._det0_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det0_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det0_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet0_should_update)
+
+                    logging.debug("JN: Also using %s as fiber alignment detector", photods[1].name)
+                    self._fbdet1 = photods[1]
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det1_cnt_ctrl.GetFont()
                     f.PointSize = 12
                     self._det1_cnt_ctrl.SetFont(f)
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
-
-                    logging.debug("JN: Also using %s as fiber alignment detector", photods[1].name)
-                    self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
-                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det2_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det2_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet2_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
 
@@ -3673,30 +3678,30 @@ class Sparc2AlignTab(Tab):
         if not main_data.ebeamControlsMag:
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
+    def _on_fbdet0_should_update(self, should_update):
+        if should_update:
+            self._fbdet0.data.subscribe(self._on_fbdet0_data)
+            logging.debug("JN: Fiber detector 0 (input) subscribe")
+        else:
+            self._fbdet0.data.unsubscribe(self._on_fbdet0_data)
+
     def _on_fbdet1_should_update(self, should_update):
         if should_update:
             self._fbdet1.data.subscribe(self._on_fbdet1_data)
-            logging.debug("JN: Fiber detector 1 (input) subscribe")
+            logging.debug("JN: Fiber detector 1 (sync) subscribe")
         else:
             self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
 
-    def _on_fbdet2_should_update(self, should_update):
-        if should_update:
-            self._fbdet2.data.subscribe(self._on_fbdet2_data)
-            logging.debug("JN: Fiber detector 2 (sync) subscribe")
-        else:
-            self._fbdet2.data.unsubscribe(self._on_fbdet2_data)
+    @wxlimit_invocation(0.5)
+    def _on_fbdet0_data(self, df, data):
+        self._det0_cnt_ctrl.SetValue("%s" % data[-1])
+        logging.debug("JN: Fiber detector 0 (input) data: %d", data[-1])
+
 
     @wxlimit_invocation(0.5)
     def _on_fbdet1_data(self, df, data):
         self._det1_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("JN: Fiber detector 1 (input) data: %d", data[-1])
-
-
-    @wxlimit_invocation(0.5)
-    def _on_fbdet2_data(self, df, data):
-        self._det2_cnt_ctrl.SetValue("%s" % data[-1])
-        logging.debug("JN: Fiber detector 2 (sync) data: %d", data[-1])
+        logging.debug("JN: Fiber detector 1 (sync) data: %d", data[-1])
 
     def _layoutModeButtons(self):
         """

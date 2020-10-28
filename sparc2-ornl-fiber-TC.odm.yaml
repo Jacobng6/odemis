@@ -351,13 +351,15 @@ SPARC2-TC-Fiber: {
 "Photon counter sync": {
     # Internal child of "Time Correlator", so no class
     creator: "Time Correlator", 
-    role: photo-detector1,
+    role: photo-detector0,
 }
 
 "Photon counter signal": {
     # Internal child of "Time Correlator", so no class
     creator: "Time Correlator", 
-    role: photo-detector0, # det0, to be shown as main graph in GUI
+    # role: photo-detector0, # det0, to be shown as main graph in GUI 
+    # TODO JN: This naming is confusing
+    role: photo-detector1,
 }
 
 # "Fiber Detector": {
