@@ -2,24 +2,17 @@
 
 """
 @author: Rinze de Laat
-
 Copyright © 2012-2013 Rinze de Laat, Éric Piel, Delmic
-
 Handles the switch of the content of the main GUI tabs.
-
 This file is part of Odemis.
-
 Odemis is free software: you can redistribute it and/or modify it under the
 terms of the GNU General Public License version 2 as published by the Free
 Software Foundation.
-
 Odemis is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License along with
 Odemis. If not, see http://www.gnu.org/licenses/.
-
 """
 
 from __future__ import division
@@ -100,7 +93,6 @@ class Tab(object):
         :type panel: wx.Panel
         :type main_frame: odemis.gui.main_xrc.xrcfr_main
         :type tab_data: odemis.gui.model.LiveViewGUIData
-
         """
         logging.debug("Initialising tab %s", name)
 
@@ -1782,7 +1774,6 @@ class AnalysisTab(Tab):
 
     def select_acq_file(self, extend=False):
         """ Open an image file using a file dialog box
-
         extend (bool): if False, will ensure that the previous streams are closed.
           If True, will add the new file to the current streams opened.
         return (boolean): True if the user did pick a file, False if it was
@@ -1863,7 +1854,6 @@ class AnalysisTab(Tab):
     def display_new_data(self, filename, data, extend=False):
         """
         Display a new data set (and removes all references to the current one)
-
         filename (str or None): Name of the file containing the data.
           If None, just the current data will be closed.
         data (list of DataArray(Shadow)): List of data to display.
@@ -2320,13 +2310,11 @@ class AnalysisTab(Tab):
 
 class SecomAlignTab(Tab):
     """ Tab for the lens alignment on the SECOM and SECOMv2 platform
-
     The streams are automatically active when the tab is shown
     It provides three ways to move the "aligner" (= optical lens position):
      * raw (via the A/B or X/Y buttons)
      * dicho mode (move opposite of the relative position of the ROI center)
      * spot mode (move equal to the relative position of the spot center)
-
     """
 
     def __init__(self, name, button, panel, main_frame, main_data):
@@ -2819,7 +2807,6 @@ class SecomAlignTab(Tab):
 
     def _onSEMpxs(self, pixel_size):
         """ Called when the SEM pixel size changes, which means the FoV changes
-
         pixel_size (tuple of 2 floats): in meter
         """
         eshape = self.tab_data_model.main.ebeam.shape
@@ -3160,6 +3147,7 @@ class SparcAlignTab(Tab):
                 return 5
 
         return None
+
 
 class Sparc2AlignTab(Tab):
     """
@@ -3542,11 +3530,8 @@ class Sparc2AlignTab(Tab):
 
         # chronograph of spectrometer if "fiber-align" mode is present
         self._speccnt_stream = None
-        self._fbdet0 = None
-        self._fbdet1 = None
+        self._fbdet2 = None
         if "fiber-align" in tab_data.align_mode.choices:
-            # TODO JN: This isn't properly reading input and sync
-
             # Need to pick the right/best component which receives light via the fiber
             photods = []
             fbaffects = main_data.fibaligner.affects.value
@@ -3568,40 +3553,24 @@ class Sparc2AlignTab(Tab):
 
             if photods:
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    # Assuming photods[0] is sync signal and photods[>0] are detectors
-
-                    logging.debug("Using %s as fiber alignment detector", photods[1].name)
-                    speccnts = acqstream.CameraCountStream("Spectrum average",
-                                        photods[1],
-                                        photods[1].data,
-                                        emitter=None,
-                                        detvas=get_local_vas(photods[1], main_data.hw_settings_config),
-                                        )
-                    speccnt_spe = self._stream_controller.addStream(speccnts,
-                                        add_to_view=self.panel.vp_align_fiber.view)
-
-                    # logging.debug("Also using %s as fiber alignment detector", photods[0].name)
-                    self._fbdet0 = photods[0]
-                    _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
-                    self._det0_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det0_cnt_ctrl.GetFont()
+                    self._fbdet2 = photods[1]
+                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
+                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det2_cnt_ctrl.GetFont()
                     f.PointSize = 12
-                    self._det0_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet0_should_update)
-
-                    # # TODO JN: Extend to > 2 detectors
-                    self._fbdet1 = photods[1]
-                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Input 1 (Plot)", "", readonly=True)
-                    self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det1_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det1_cnt_ctrl.SetFont(f)
+                    self._det2_cnt_ctrl.SetFont(f)
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
-                else:
-                    pass
-                    # TODO JN
-                    # Default Delmic code
-
+                
+                logging.debug("Using %s as fiber alignment detector", photods[0].name)
+                speccnts = acqstream.CameraCountStream("Spectrum average",
+                                       photods[0],
+                                       photods[0].data,
+                                       emitter=None,
+                                       detvas=get_local_vas(photods[0], main_data.hw_settings_config),
+                                       )
+                speccnt_spe = self._stream_controller.addStream(speccnts,
+                                    add_to_view=self.panel.vp_align_fiber.view)
+                                    
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3617,8 +3586,7 @@ class Sparc2AlignTab(Tab):
                     speccnt_spe.add_axis_entry("band", main_data.tc_filter)
                 speccnt_spe.stream_panel.flatten()
                 self._speccnt_stream = speccnts
-                # speccnts.should_update.subscribe(self._on_ccd_stream_play)
-                speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
@@ -3681,28 +3649,15 @@ class Sparc2AlignTab(Tab):
         if not main_data.ebeamControlsMag:
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
-    def _on_fbdet0_should_update(self, should_update):
-        if should_update:
-            self._fbdet0.data.subscribe(self._on_fbdet0_data)
-        else:
-            self._fbdet0.data.unsubscribe(self._on_fbdet0_data)
-
     def _on_fbdet1_should_update(self, should_update):
         if should_update:
-            self._fbdet1.data.subscribe(self._on_fbdet1_data)
+            self._fbdet2.data.subscribe(self._on_fbdet2_data)
         else:
-            self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
+            self._fbdet2.data.unsubscribe(self._on_fbdet2_data)
 
     @wxlimit_invocation(0.5)
-    def _on_fbdet0_data(self, df, data):
-        self._det0_cnt_ctrl.SetValue("%s" % data[-1])
-        # logging.debug("Fiber detector 0 (sync) data: %d", data[-1])
-
-
-    @wxlimit_invocation(0.5)
-    def _on_fbdet1_data(self, df, data):
-        self._det1_cnt_ctrl.SetValue("%s" % data[-1])
-        # logging.debug("Fiber detector 1 (input) data: %d", data[-1])
+    def _on_fbdet2_data(self, df, data):
+        self._det2_cnt_ctrl.SetValue("%s" % data[-1])
 
     def _layoutModeButtons(self):
         """
@@ -3748,7 +3703,6 @@ class Sparc2AlignTab(Tab):
         """
         Add the MoI value entry and spot size entry
         :param stream_cont: (Container aka StreamPanel)
-
         """
         # the "MoI" value bellow the streams
         lbl_moi, txt_moi = cont.add_text_field("Moment of inertia", readonly=True)
@@ -3807,10 +3761,8 @@ class Sparc2AlignTab(Tab):
 
     def _onClickAlignButton(self, evt):
         """ Called when one of the Mirror/Optical fiber button is pushed
-
         Note: in practice they can never be unpushed by the user, so this happens
           only when the button is toggled on.
-
         """
 
         btn = evt.GetEventObject()
@@ -3922,7 +3874,6 @@ class Sparc2AlignTab(Tab):
             self.panel.pnl_streak.Enable(False)
         elif mode == "fiber-align":
             self.tab_data_model.focussedView.value = self.panel.vp_align_fiber.view
-            logging.warning(self.tab_data_model.focussedView.value)
             if self._speccnt_stream:
                 self._speccnt_stream.should_update.value = True
             if self._mirror_settings_controller:
@@ -4270,7 +4221,6 @@ class Sparc2AlignTab(Tab):
                 btn = self.panel.btn_autofocus
                 gauge = self.panel.gauge_autofocus
             elif align_mode == "fiber-align":
-                # TODO JN?
                 focus_mode = "spec-fiber-focus"
                 ss = []  # No stream to play
                 btn = self.panel.btn_fib_autofocus
@@ -4472,7 +4422,7 @@ class Sparc2AlignTab(Tab):
 
         # Save the axis position as the "calibrated" one
         ss = self.tab_data_model.main.spec_sel
-        logging.info("Updating the active fiber X position to %s", pos)
+        logging.debug("Updating the active fiber X position to %s", pos)
         ss.updateMetadata({model.MD_FAV_POS_ACTIVE: pos})
 
     def _onFiberPos(self, pos):
@@ -4492,7 +4442,7 @@ class Sparc2AlignTab(Tab):
         # If old hardware, without FAV_POS: just do nothing
         if fib_fav_pos and "y" in fib_fav_pos:
             fib_fav_pos["y"] = pos["y"]
-            logging.info("Updating the active fiber Y position to %s", fib_fav_pos)
+            logging.debug("Updating the active fiber Y position to %s", fib_fav_pos)
             fiba.updateMetadata({model.MD_FAV_POS_ACTIVE: fib_fav_pos})
 
     def Show(self, show=True):
@@ -4555,6 +4505,7 @@ class Sparc2AlignTab(Tab):
                 return 5
 
         return None
+
 
 class TabBarController(object):
     def __init__(self, tab_defs, main_frame, main_data):
@@ -4620,10 +4571,8 @@ class TabBarController(object):
 
     def _create_needed_tabs(self, tab_defs, main_frame, main_data):
         """ Create the tabs needed by the current microscope
-
         Tabs that are not wanted or needed will be removed from the list and the associated
         buttons will be hidden in the user interface.
-
         returns tabs (list of Tabs): all the compatible tabs
                 default_tab (Tab): the first tab to be shown
         """
