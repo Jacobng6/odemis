@@ -3581,6 +3581,8 @@ class Sparc2AlignTab(Tab):
                     f.PointSize = 12
                     self._det1_cnt_ctrl.SetFont(f)
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                    if len(photods) > 2:
+                        logging.warning("Multiple detectors available. Only reading input from sync and channel 1 detector")
                 else:
                     logging.debug("Using %s as fiber alignment detector", photods[0].name)
                     speccnts = acqstream.CameraCountStream("Spectrum average",
@@ -3604,9 +3606,8 @@ class Sparc2AlignTab(Tab):
 
                 if main_data.tc_od_filter:
                     speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
-                    speccnt_spe.add_axis_entry("band", main_data.tc_filter)
-                # TODO JN: should the lines below be part of the if-statement?    
-                speccnt_spe.stream_panel.flatten()
+                    speccnt_spe.add_axis_entry("band", main_data.tc_filter)   
+                speccnt_spe.stream_panel.flatten() # TODO JN: should these lines be part of the if-statement? 
                 self._speccnt_stream = speccnts
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
             else:
