@@ -3553,6 +3553,10 @@ class Sparc2AlignTab(Tab):
 
             if photods:
                 
+                logging.warning("JN")
+                logging.warning(main_data.time_correlator)
+
+
                 logging.debug("Using %s as fiber alignment detector", photods[0].name)
                 speccnts = acqstream.CameraCountStream("Spectrum average",
                                        photods[0],
