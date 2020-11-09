@@ -3530,7 +3530,8 @@ class Sparc2AlignTab(Tab):
 
         # chronograph of spectrometer if "fiber-align" mode is present
         self._speccnt_stream = None
-        self._fbdet2 = None
+        self._fbdet0 = None
+        self._fbdet1 = None
         if "fiber-align" in tab_data.align_mode.choices:
             # Need to pick the right/best component which receives light via the fiber
             photods = []
@@ -3552,20 +3553,44 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
-                
-                logging.warning("JN")
-                logging.warning(main_data.time_correlator)
+                if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
+                    # Assuming photods[0] is sync signal and photods[>0] are detectors
+                    # TODO JN: Extend to multiple detectors
+                    logging.debug("Using %s as fiber alignment detector", photods[1].name)
+                    speccnts = acqstream.CameraCountStream("Spectrum average",
+                                        photods[1],
+                                        photods[1].data,
+                                        emitter=None,
+                                        detvas=get_local_vas(photods[1], main_data.hw_settings_config),
+                                        )
+                    speccnt_spe = self._stream_controller.addStream(speccnts,
+                                        add_to_view=self.panel.vp_align_fiber.view)
+                    
+                    self._fbdet0 = photods[0]
+                    _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
+                    self._det0_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det0_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det0_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet0_should_update)
 
-
-                logging.debug("Using %s as fiber alignment detector", photods[0].name)
-                speccnts = acqstream.CameraCountStream("Spectrum average",
-                                       photods[0],
-                                       photods[0].data,
-                                       emitter=None,
-                                       detvas=get_local_vas(photods[0], main_data.hw_settings_config),
-                                       )
-                speccnt_spe = self._stream_controller.addStream(speccnts,
-                                    add_to_view=self.panel.vp_align_fiber.view)
+                    self._fbdet1 = photods[1]
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1 (Plot)", "", readonly=True)
+                    self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det1_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det1_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
+                else:
+                    logging.debug("Using %s as fiber alignment detector", photods[0].name)
+                    speccnts = acqstream.CameraCountStream("Spectrum average",
+                                        photods[0],
+                                        photods[0].data,
+                                        emitter=None,
+                                        detvas=get_local_vas(photods[0], main_data.hw_settings_config),
+                                        )
+                    speccnt_spe = self._stream_controller.addStream(speccnts,
+                                        add_to_view=self.panel.vp_align_fiber.view)
 
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
@@ -3580,18 +3605,10 @@ class Sparc2AlignTab(Tab):
                 if main_data.tc_od_filter:
                     speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
                     speccnt_spe.add_axis_entry("band", main_data.tc_filter)
+                # TODO JN: should the lines below be part of the if-statement?    
                 speccnt_spe.stream_panel.flatten()
                 self._speccnt_stream = speccnts
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
-
-                if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
-                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det2_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det2_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
 
@@ -3653,16 +3670,26 @@ class Sparc2AlignTab(Tab):
         if not main_data.ebeamControlsMag:
             main_data.ebeam.magnification.subscribe(self._onSEMMag)
 
+    def _on_fbdet0_should_update(self, should_update):
+        if should_update:
+            self._fbdet0.data.subscribe(self._on_fbdet0_data)
+        else:
+            self._fbdet0.data.unsubscribe(self._on_fbdet0_data)
+
     def _on_fbdet1_should_update(self, should_update):
         if should_update:
-            self._fbdet2.data.subscribe(self._on_fbdet2_data)
+            self._fbdet1.data.subscribe(self._on_fbdet1_data)
         else:
-            self._fbdet2.data.unsubscribe(self._on_fbdet2_data)
+            self._fbdet1.data.unsubscribe(self._on_fbdet1_data)
 
     @wxlimit_invocation(0.5)
-    def _on_fbdet2_data(self, df, data):
-        self._det2_cnt_ctrl.SetValue("%s" % data[-1])
+    def _on_fbdet0_data(self, df, data):
+        self._det0_cnt_ctrl.SetValue("%s" % data[-1])
 
+    @wxlimit_invocation(0.5)
+    def _on_fbdet1_data(self, df, data):
+        self._det1_cnt_ctrl.SetValue("%s" % data[-1])
+        
     def _layoutModeButtons(self):
         """
         Positions the mode buttons in a nice way: on one line if they fit,
