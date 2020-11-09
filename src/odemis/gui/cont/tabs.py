@@ -3552,14 +3552,6 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
-                if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    self._fbdet2 = photods[1]
-                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
-                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
-                    f = self._det2_cnt_ctrl.GetFont()
-                    f.PointSize = 12
-                    self._det2_cnt_ctrl.SetFont(f)
-                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
                 
                 logging.debug("Using %s as fiber alignment detector", photods[0].name)
                 speccnts = acqstream.CameraCountStream("Spectrum average",
@@ -3570,7 +3562,7 @@ class Sparc2AlignTab(Tab):
                                        )
                 speccnt_spe = self._stream_controller.addStream(speccnts,
                                     add_to_view=self.panel.vp_align_fiber.view)
-                                    
+
                 # Special for the time-correlator: some of its settings also affect
                 # the photo-detectors.
                 if main_data.time_correlator:
@@ -3588,6 +3580,14 @@ class Sparc2AlignTab(Tab):
                 self._speccnt_stream = speccnts
                 speccnts.should_update.subscribe(self._on_ccd_stream_play)
 
+                if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
+                    self._fbdet2 = photods[1]
+                    _, self._det2_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 2", "", readonly=True)
+                    self._det2_cnt_ctrl.SetForegroundColour("#FFFFFF")
+                    f = self._det2_cnt_ctrl.GetFont()
+                    f.PointSize = 12
+                    self._det2_cnt_ctrl.SetFont(f)
+                    speccnts.should_update.subscribe(self._on_fbdet1_should_update)
             else:
                 logging.warning("Fiber-aligner present, but found no detector affected by it.")
 
