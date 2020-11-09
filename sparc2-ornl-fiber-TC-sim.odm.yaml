@@ -319,7 +319,7 @@ SPARC2-TC-Fiber: {
 }
 
 "Time Correlator": {
-    class: picoquant400.HH400,
+    class: picoquant.HH400,
     role: time-correlator,
     init: {
         device: "fake",
