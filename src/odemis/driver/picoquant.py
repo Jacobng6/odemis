@@ -1135,7 +1135,6 @@ class HH400(model.Detector):
           or None if any device is fine.
         dependencies (dict str -> Component): shutters components (shutter0 through
          shutter8 are valid. shutter0 corresponds to the sync signal)
-         # TODO JN: Ignore shutters for our purposes
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector8 are valid. detector0 corresponds to the sync signal)
 
@@ -1145,10 +1144,6 @@ class HH400(model.Detector):
         zero_cross (8 (0 <= float <= 40 e-3)): zero cross voltage for the photo-detector 1 through 8 (in V)
         shutter_axes (dict str -> str, value, value): internal child role of the photo-detector ->
           axis name, position when shutter is closed (ie protected), position when opened (receiving light).
-
-          **Copied from PH300 code with PH300 changed to HH400. It seems the HHDLL library is near identical
-          to the PHDLL library, and the functions are defined the same with the change of PH -> HH.
-          This will have to be tested**
         """
         if dependencies is None:
             dependencies = {}
@@ -1216,7 +1211,7 @@ class HH400(model.Detector):
         # detector0 should correspond to the sync signal
         for name, ckwargs in children.items():
             num = int(name.split("detector")[1])
-            # TODO JN: This name parsing could be more elegant
+            # TODO: Better solution than name parsing?
             if 0 <= num <= (HH_HHMAXINPCHAN - 1):
                 if ("shutter%s" % num) in dependencies:
                     shutter_name = "shutter%s" % num
@@ -1259,7 +1254,7 @@ class HH400(model.Detector):
             2 ** 16,
         )  # Histogram is 32 bits, but only return 16 bits info
 
-        # TODO JN: Currently uses same settings for all channels
+        # TODO: Currently uses same settings for all channels
         # self.SetInputChannelEnable(channel, bool)
 
         tresbase, binsteps = self.GetBaseResolution()
@@ -1899,7 +1894,6 @@ class HH400(model.Detector):
         offset_ps = int(offset * 1e12)
         self.SetSyncChannelOffset(offset_ps)
         offset = offset_ps * 1e-12  # convert the round-down in ps back to s
-        # TODO JN: What is this doing? Just updates metadata
         tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
         self._metadata[model.MD_TIME_LIST] = tl
         return offset
@@ -2068,9 +2062,8 @@ class HH400(model.Detector):
 
                 # Stop measurement if any bin fills up
                 self.SetStopOverflow(True, HH_STOPCNTMAX)
-                # TODO JN: Odemis waits a while to keep acquiring even after overflow
-                # Check for overflow at the end and log debug message.
-                # Log at warming level, or generate special data for indicate something went wrong
+                # Odemis waits a while to keep acquiring even after overflow
+                # Check for overflow at the end and log warning message
 
                 # Keep acquiring
                 while True:
@@ -2109,7 +2102,7 @@ class HH400(model.Detector):
                     data = self.GetHistogram(0)
                     da = model.DataArray(data, md)
                     self.data.notify(da)
-                    # TODO JN: support multiple channels
+                    # TODO: support multiple channels
                     # data = []
                     # for i in range(0, self._numinput):
                     #     data.append( self.GetHistogram(i, 0) )
@@ -2130,7 +2123,7 @@ class HH400(model.Detector):
 
         flags = self.GetFlags()
         if flags & HH_FLAG_OVERFLOW > 0:
-            logging.warning("Overflow")
+            logging.warning("Bin overflow. Consider decreasing input count")
 
         logging.debug("Acquisition thread ended")
 
@@ -2225,23 +2218,26 @@ class HH400RawDetector(model.Detector):
     """
     Represents a raw detector (eg, APD, PMT) accessed via PicoQuant HydraHarp 400.
     Cannot be directly created. It must be done via HH400 child.
-    **Copied from PH300RawDetector with PH300 changed to HH400** ~Eric Liu
     """
 
     def __init__(self, name, role, channel, parent, shutter_name=None, **kwargs):
         """
         channel (int): input channel index 0..nchannels-1
         """
+        # The detector channels are numbered 1-8 on the HydraHarp. And the detector childen
+        # are named detector1 .. detector8 in the yaml file, because detector0 is reserved
+        # for the sync signal. However, the HH400 dll uses zero-indexing for the detectors
+        # (the detector plugged into channel 1 is referenced as channel 0). The solution
+        # below is to rename detector0 as "sync" and downshift the other detectors.
         if channel == 0:
             self._channel = "Sync"
-        # TODO JN: Confusion with zero-indexing
         else:
             self._channel = channel - 1
         super(HH400RawDetector, self).__init__(name, role, parent=parent, **kwargs)
 
         self._shape = (2 ** 31,)  # only one point, with (32 bits) int size
         self.data = BasicDataFlow(self)
-        # TODO JN: Separate DataFlow for multiple channels?
+        # TODO: Separate DataFlow for multiple channels?
 
         self._metadata[model.MD_DET_TYPE] = model.MD_DT_NORMAL
         self._generator = None
@@ -2474,10 +2470,7 @@ class FakeHHDLL(object):
     """
     Fake HHDLL. It basically simulates one connected device, which returns
     reasonable values.
-    **Copied from FakePHDLL, with PH300 changed to HH400** ~Eric Liu
     """
-
-    # TODO JN: When do I have to use _deref and _val and pointers?
 
     def __init__(self):
         self._idx = 0
