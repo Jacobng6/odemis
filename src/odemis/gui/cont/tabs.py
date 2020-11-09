@@ -3567,7 +3567,7 @@ class Sparc2AlignTab(Tab):
                                         add_to_view=self.panel.vp_align_fiber.view)
                     
                     self._fbdet0 = photods[0]
-                    _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Sync", "", readonly=True)
+                    _, self._det0_cnt_ctrl = speccnt_spe.stream_panel.add_text_field(photods[0].name, "", readonly=True)
                     self._det0_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det0_cnt_ctrl.GetFont()
                     f.PointSize = 12
@@ -3575,7 +3575,7 @@ class Sparc2AlignTab(Tab):
                     speccnts.should_update.subscribe(self._on_fbdet0_should_update)
 
                     self._fbdet1 = photods[1]
-                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field("Detector 1 (Plot)", "", readonly=True)
+                    _, self._det1_cnt_ctrl = speccnt_spe.stream_panel.add_text_field(photods[1].name, "", readonly=True)
                     self._det1_cnt_ctrl.SetForegroundColour("#FFFFFF")
                     f = self._det1_cnt_ctrl.GetFont()
                     f.PointSize = 12
