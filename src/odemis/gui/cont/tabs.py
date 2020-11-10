@@ -3563,7 +3563,7 @@ class Sparc2AlignTab(Tab):
                     logging.debug("Using %s as fiber alignment detector", plot_detector)
                     speccnts = acqstream.CameraCountStream("Spectrum average",
                                         plot_detector,
-                                        plot_detector,
+                                        plot_detector.data,
                                         emitter=None,
                                         detvas=get_local_vas(plot_detector, main_data.hw_settings_config),
                                         )
