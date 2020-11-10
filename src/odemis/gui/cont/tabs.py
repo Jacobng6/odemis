@@ -3556,12 +3556,16 @@ class Sparc2AlignTab(Tab):
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
                     # Assuming photods[0] is sync signal and photods[>0] are detectors
                     # TODO JN: Extend to multiple detectors
-                    logging.debug("Using %s as fiber alignment detector", photods[1].name)
+                    if photods[0].name.find("sync") > 0:
+                        plot_detector = photods[1]
+                    else:
+                        plot_detector = photods[0]
+                    logging.debug("Using %s as fiber alignment detector", plot_detector)
                     speccnts = acqstream.CameraCountStream("Spectrum average",
-                                        photods[1],
-                                        photods[1].data,
+                                        plot_detector,
+                                        plot_detector,
                                         emitter=None,
-                                        detvas=get_local_vas(photods[1], main_data.hw_settings_config),
+                                        detvas=get_local_vas(plot_detector, main_data.hw_settings_config),
                                         )
                     speccnt_spe = self._stream_controller.addStream(speccnts,
                                         add_to_view=self.panel.vp_align_fiber.view)
