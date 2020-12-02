@@ -42,7 +42,9 @@ from odemis.util import spectrum
 import odemis.gui.img as guiimg
 from odemis.acq.stream import RGBProjection, RGBSpatialProjection,\
     SinglePointTemporalProjection, DataProjection
+from odemis.model import TINT_FIT_TO_RGB, TINT_RGB_AS_IS
 from odemis.model import DataArrayShadow
+import matplotlib.colors as colors
 
 BAR_PLOT_COLOUR = (0.5, 0.5, 0.5)
 CROP_RES_LIMIT = 1024
@@ -74,15 +76,16 @@ ARC_RADIUS = 0.002
 ARC_LEFT_MARGIN = 0.01
 ARC_TOP_MARGIN = 0.0104
 TINT_SIZE = 0.0155
+COLORBAR_WIDTH_RATIO = 0.6  # the fraction of the two cells to make the colorbar
 
 
 # TODO: rename to *_bgra_*
 def format_rgba_darray(im_darray, alpha=None):
     """ Reshape the given numpy.ndarray from RGB to BGRA format
-    im_darray (DataArray or tuple of tuple of DataArray): input image
+    im_darray (DataArray of shape Y,X,{3,4}): input image
     alpha (0 <= int <= 255 or None): If an alpha value is provided it will be
       set in the '4th' byte and used to scale the other RGB values within the array.
-    return (DataArray or tuple of tuple of DataArray): The return type is the same of im_darray
+    return (DataArray of shape Y,X,4): The return type is the same of im_darray
     """
     if im_darray.shape[-1] == 3:
         h, w, _ = im_darray.shape
@@ -93,11 +96,7 @@ def format_rgba_darray(im_darray, alpha=None):
         if alpha is not None:
             rgba[:, :, 3] = alpha
             if alpha != 255:
-                rgba = scale_to_alpha(rgba)
-        new_darray = model.DataArray(rgba)
-
-        return new_darray
-
+                scale_to_alpha(rgba)
     elif im_darray.shape[-1] == 4:
         if hasattr(im_darray, 'metadata'):
             if im_darray.metadata.get('byteswapped', False):
@@ -109,11 +108,60 @@ def format_rgba_darray(im_darray, alpha=None):
         rgba[:, :, 1] = im_darray[:, :, 1]
         rgba[:, :, 2] = im_darray[:, :, 0]
         rgba[:, :, 3] = im_darray[:, :, 3]
-        new_darray = model.DataArray(rgba)
-        new_darray.metadata['byteswapped'] = True
-        return new_darray
     else:
         raise ValueError("Unsupported colour depth!")
+
+    new_darray = model.DataArray(rgba)
+    new_darray.metadata['byteswapped'] = True
+    return new_darray
+
+
+def format_bgra_to_rgb(im_darray, keepalpha=True, inplace=False):
+    """ Reshape the given numpy.ndarray from BGR(A) to RGB(A) format
+    im_darray (DataArray of shape Y,X,{3,4}): input image
+    keepalpha (bool): If an alpha is present, keep it. IOW, if there are 4 channels,
+      the 4th channel will be kept as is.
+    inplace (bool): directly modify im_darray. If True, keepalpha must also be
+       True (as the array cannot change shape).
+    return (DataArray of shape Y,X,{3,4}): The return type is the same of im_darray
+    """
+    assert im_darray.ndim == 3
+
+    if hasattr(im_darray, 'metadata'):
+        if not im_darray.metadata.get('byteswapped', True):
+            logging.warning("Trying to convert to RGB an array already in RGB")
+            return im_darray
+
+    if im_darray.shape[-1] == 3:
+        shape = im_darray.shape
+    elif im_darray.shape[-1] == 4:
+        if keepalpha:
+            shape = im_darray.shape
+        else:
+            shape = im_darray.shape[:2] + (3,)
+            if inplace:
+                raise ValueError("Cannot drop alpha channel in-place")
+    else:
+        raise ValueError("Unsupported colour depth!")
+
+    if inplace:
+        rgba = im_darray
+        rgba[:,:, [2, 0]] = rgba[:,:, [0, 2]]  # Just switch R <> B
+    else:
+        rgba = numpy.empty(im_darray.shape, dtype=numpy.uint8)
+        # Copy the data over with bytes 0 and 2 being swapped (RGB becomes BGR through the -1)
+        rgba[:,:, 0] = im_darray[:,:, 2]
+        rgba[:,:, 1] = im_darray[:,:, 1]
+        rgba[:,:, 2] = im_darray[:,:, 0]
+        if shape[-1] == 4:
+            rgba[:,:, 3] = im_darray[:,:, 3]
+
+    # Add metadata to detect if the function is called twice on the same array
+    if not hasattr(rgba, 'metadata'):
+        rgba = model.DataArray(rgba)
+    rgba.metadata['byteswapped'] = False
+
+    return rgba
 
 
 def min_type(data):
@@ -776,7 +824,7 @@ def ar_to_export_data(projections, raw=False):
             legend_rgb = draw_legend_simple(stream_im, buffer_size, date,
                                             img_file=logo, bg_color=(1, 1, 1), text_color=(0, 0, 0))
             data_with_legend = numpy.append(data_to_draw, legend_rgb, axis=0)
-            data_with_legend[:, :, [2, 0]] = data_with_legend[:, :, [0, 2]]  # BGRA -> RGBA for exporter
+            format_bgra_to_rgb(data_with_legend, inplace=True)
             ar_plot_final = model.DataArray(data_with_legend, metadata={model.MD_DIMS: "YXC"})
             data_dict[pol_mode] = ar_plot_final
 
@@ -805,7 +853,7 @@ def value_to_pixel(value, pixel_space, value_range, orientation):
     if None in value_range:
         return None
 
-    assert value_range[0] <= value <= value_range[-1]
+    assert value_range[0] <= value <= value_range[-1] or value_range[-1] <= value <= value_range[0]
 
     # if going from big to small, reverse temporarily from small to big and we'll
     # reverse the result at the end
@@ -848,7 +896,8 @@ def calculate_ticks(value_range, client_size, orientation, tick_spacing):
         logging.info("Trying to compute legend tick without range")
         return None
 
-    min_val, max_val = value_range[0], value_range[-1]
+    min_val = min(value_range[0], value_range[-1])
+    max_val = max(value_range[0], value_range[-1])
 
     # Get the horizontal/vertical space in pixels
     if orientation == wx.HORIZONTAL:
@@ -856,8 +905,9 @@ def calculate_ticks(value_range, client_size, orientation, tick_spacing):
         # Don't display ticks too close from the left border
         min_pixel = 10
     else:
+        # Don't display ticks too close from the border
         pixel_space = client_size[1]
-        min_pixel = 0
+        min_pixel = 10
 
     # Range width
     value_space = abs(max_val - min_val)
@@ -1314,8 +1364,7 @@ def chronogram_to_export_data(proj, raw, vp=None):
         # Draw spectrum bar plot
         fill_colour = BAR_PLOT_COLOUR
         client_size = (SPEC_PLOT_SIZE, SPEC_PLOT_SIZE)
-        data_to_draw = numpy.empty((client_size[1], client_size[0], 4), dtype=numpy.uint8)
-        data_to_draw.fill(255)
+        data_to_draw = numpy.full((client_size[1], client_size[0], 4), 255, dtype=numpy.uint8)
         surface = cairo.ImageSurface.create_for_data(
             data_to_draw, cairo.FORMAT_ARGB32, client_size[0], client_size[1])
         ctx = cairo.Context(surface)
@@ -1510,9 +1559,10 @@ def _draw_image_graph(im, size, xrange, xunit, xtitle, yrange, yunit, ytitle, fl
     scale_y_draw = numpy.append(extend[:SMALL_SCALE_WIDTH, :SMALL_SCALE_WIDTH], scale_y_draw, axis=0)
     data_with_legend = numpy.append(data_with_legend, scale_y_draw, axis=1)
 
-    plot_im = model.DataArray(data_with_legend)
-    plot_im.metadata[model.MD_DIMS] = 'YXC'
-    return plot_im
+    data_with_legend = model.DataArray(data_with_legend)
+    data_with_legend.metadata[model.MD_DIMS] = 'YXC'
+    format_bgra_to_rgb(data_with_legend, inplace=True)
+    return data_with_legend
 
 
 def _draw_file(file, legend_ctx, buffer_size, margin_x, legend_height, cell_x_step, cell_factor=1):
@@ -1777,17 +1827,44 @@ def draw_legend_multi_streams(images, buffer_size, buffer_scale,
         if s:
             legend_ctx.show_text(s.name.value)
 
-        # If stream has tint, draw the colour in a little square next to the name
-        if (stream is None and
-            (isinstance(s, (acqstream.FluoStream, acqstream.StaticFluoStream)) or
-             hasattr(s, "tint") and tuple(s.tint.value) != (255, 255, 255)
-           )):
+        # Handle the stream colormap
+        if stream is None and hasattr(s, "tint"):
             tint = s.tint.value
-            legend_ctx.set_source_rgb(*conversion.rgb_to_frgb(tint))
-            legend_ctx.rectangle(legend_x_pos + cell_x_step - tint_box_size - small_font,
-                                 legend_y_pos - small_font,
-                                 tint_box_size, tint_box_size)
-            legend_ctx.fill()
+            
+            if tint != TINT_RGB_AS_IS:
+
+                tint = img.tintToColormap(tint)
+            
+                # Draw a gradient of the colormap
+                width = int(cell_x_step * 2 * COLORBAR_WIDTH_RATIO)
+                height = int(tint_box_size)
+
+                colorbar_start_x = legend_x_pos + cell_x_step * 2 * 0.12
+                colorbar_start_y = legend_y_pos + 3
+
+                # draw colorbar scale
+                if s.tint.value != TINT_FIT_TO_RGB:
+                    legend_ctx.move_to(legend_x_pos, legend_y_pos + SUB_UPPER * buffer_size[0])
+                    legend_ctx.show_text(str(s.intensityRange.value[0]))
+                    legend_ctx.move_to(legend_x_pos + colorbar_start_x + width - 10, legend_y_pos + SUB_UPPER * buffer_size[0])
+                    legend_ctx.show_text(str(s.intensityRange.value[1]))
+
+                legend_ctx.rectangle(colorbar_start_x,
+                                 colorbar_start_y,
+                                 width, height)
+                legend_ctx.fill()
+
+                gradient = img.getColorbar(tint, width - 2, height - 2, alpha=True)
+                gradient = format_rgba_darray(gradient)
+                surface = cairo.ImageSurface.create_for_data(
+                    gradient, cairo.FORMAT_RGB24, gradient.shape[1], gradient.shape[0])
+
+                legend_ctx.set_source_surface(surface, colorbar_start_x + 1,
+                                 colorbar_start_y + 1)
+                legend_ctx.paint()
+
+                legend_x_pos += cell_x_step
+                
             legend_ctx.set_source_rgb(*text_color)
 
         legend_x_pos += cell_x_step
@@ -2265,7 +2342,9 @@ def images_to_export_data(streams, view_hfw, view_pos,
 
 def _adapt_rgb_to_raw(imrgb, data_raw):
     """
-    imrgb (ndarray Y,X,4): RGB image to convert to a greyscale
+    Converts a RGB(A) image to greyscale.
+    Note: for now the implementation is very crude and just takes the first channel.
+    imrgb (ndarray Y,X,{3,4}): RGB image to convert to a greyscale.
     data_raw (DataArray): Raw image (to know the dtype and min/max)
     return (ndarray Y,X)
     """
@@ -2359,7 +2438,7 @@ def add_alpha_byte(im_darray, alpha=255):
         new_im[:, :, :-1] = im_darray
 
         if alpha != 255:
-            new_im = scale_to_alpha(new_im)
+            scale_to_alpha(new_im)
 
         if isinstance(im_darray, model.DataArray):
             return model.DataArray(new_im, im_darray.metadata)
@@ -2375,6 +2454,7 @@ def scale_to_alpha(im_darray):
 
     im_darray (numpy.array of shape Y, X, 4, and dtype uint8). Alpha channel
     is the fourth element of the last dimension. It is modified in place.
+    return im_darray (numpy.array): the input
     """
 
     if im_darray.shape[2] != 4:
@@ -2515,6 +2595,7 @@ def insert_tile_to_image(tile, ovv):
         interpolate_data=True
     )
 
+    # Copy back to original image and convert back to RGB, at once
     ovv[:, :, 0] = ovv_bgra[:, :, 2]
     ovv[:, :, 1] = ovv_bgra[:, :, 1]
     ovv[:, :, 2] = ovv_bgra[:, :, 0]
@@ -2552,11 +2633,6 @@ def merge_screen(im, background):
                buffer_size, 1, blend_mode=BLEND_SCREEN)
 
     # Convert back to RGB
-    rgb = numpy.empty((im.shape[0], im.shape[1], 3), dtype=numpy.uint8)
-    rgb[:, :, 0] = background[:, :, 2]
-    rgb[:, :, 1] = background[:, :, 1]
-    rgb[:, :, 2] = background[:, :, 0]
-    rgb = model.DataArray(rgb, md)
-
-    return rgb
+    format_bgra_to_rgb(im, inplace=True)
+    return im
 
