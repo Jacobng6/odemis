@@ -3553,10 +3553,10 @@ class Sparc2AlignTab(Tab):
                         photods.append(d)
 
             if photods:
+                    
                 if len(photods) > 1 and photods[0] in main_data.photo_ds and photods[1] in main_data.photo_ds:
-                    # Assuming photods[0] is sync signal and photods[>0] are detectors
-                    # TODO JN: Extend to multiple detectors
                     if photods[0].name.find("sync") > 0:
+                        # Assuming photods[0] is sync signal and photods[>0] are detectors
                         plot_detector = photods[1]
                     else:
                         plot_detector = photods[0]
@@ -3587,6 +3587,7 @@ class Sparc2AlignTab(Tab):
                     speccnts.should_update.subscribe(self._on_fbdet1_should_update)
                     if len(photods) > 2:
                         logging.warning("Multiple detectors available. Only reading input from sync and channel 1 detector")
+                        # TODO: Extend to multiple detectors
                 else:
                     logging.debug("Using %s as fiber alignment detector", photods[0].name)
                     speccnts = acqstream.CameraCountStream("Spectrum average",
