@@ -1306,7 +1306,7 @@ class HH400(model.Detector):
             )
             self._setSyncCFD(self.syncChannelDisc.value, sync_zc)
             # TODO JN
-
+            
         self.syncChannelOffset = model.FloatContinuous(
             0,
             (HH_CHANOFFSMIN * 1e-12, HH_CHANOFFSMAX * 1e-12),
