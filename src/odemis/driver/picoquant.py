@@ -1123,7 +1123,7 @@ class HH400(model.Detector):
         dependencies=None,
         children=None,
         daemon=None,
-        sync_level=None,
+        sync_dv=None,
         sync_zc=None,
         disc_volt=None,
         zero_cross=None,
@@ -1138,7 +1138,7 @@ class HH400(model.Detector):
         children (dict str -> kwargs): the names of the detectors (detector0 through
          detector8 are valid. detector0 corresponds to the sync signal)
 
-        sync_level (0 <= float <= 1.0): discriminator voltage for the laser signal (detector0) (in V)
+        sync_dv (0 <= float <= 1.0): discriminator voltage for the laser signal (detector0) (in V)
         sync_zc (0 <= float <= 40 e-3): zero cross voltage for the laser signal (detector0) (in V)
         disc_volt (8 (0 <= float <= 1.0)): discriminator voltage for the photo-detector 1 through 8 (in V)
         zero_cross (8 (0 <= float <= 40 e-3)): zero cross voltage for the photo-detector 1 through 8 (in V)
@@ -1269,7 +1269,14 @@ class HH400(model.Detector):
         self._setPixelDuration(self.pixelDuration.value)
 
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
-            self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
+            self.inputChannelDisc = model.FloatContinuous(
+                dv,
+                (HH_DISCRMIN * 1e-3, HH_DISCRMAX * 1e-3),
+                unit="V",
+                setter=self._setInputCFD,
+            )
+            self._setInputCFD(i, self.inputChannelDisc.value, zc)
+            # TODO JN
 
             self.inputChannelOffset = model.FloatContinuous(
                 0,
@@ -1290,8 +1297,15 @@ class HH400(model.Detector):
         )
         self._setSyncDiv(self.syncDiv.value)
 
-        if (sync_level != None) and (sync_zc != None):
-            self.SetSyncCFD(int(sync_level * 1000), int(sync_zc * 1000))
+        if (sync_dv != None) and (sync_zc != None):
+            self.syncChannelDisc = model.FloatContinuous(
+                sync_dv,
+                (HH_DISCRMIN * 1e-3, HH_DISCRMAX * 1e-3),
+                unit="V",
+                setter=self._setSyncCFD,
+            )
+            self._setSyncCFD(self.syncChannelDisc.value, sync_zc)
+            # TODO JN
 
         self.syncChannelOffset = model.FloatContinuous(
             0,
@@ -1890,6 +1904,15 @@ class HH400(model.Detector):
         self.SetSyncDiv(div)
         return div
 
+    def _setSyncCFD(self, sync_dv, sync_zc):
+        # TODO JN
+        sync_dv_mv = int(sync_dv * 1000)
+        sync_zc_mv = int(sync_zc * 1000)
+        self.SetSyncCFD(sync_dv_mv, sync_zc_mv)
+        sync_dv = sync_dv_mv / 1000 # convert the round-down in mv back to v
+        sync_zc = sync_zc_mv / 1000 # convert the round-down in mv back to v
+        return sync_dv
+
     def _setSyncChannelOffset(self, offset):
         offset_ps = int(offset * 1e12)
         self.SetSyncChannelOffset(offset_ps)
@@ -1897,6 +1920,15 @@ class HH400(model.Detector):
         tl = numpy.arange(self._shape[0]) * self.pixelDuration.value + offset
         self._metadata[model.MD_TIME_LIST] = tl
         return offset
+
+    def _setInputDisc(self, channel, dv, zc):
+        # TODO JN
+        dv_mv = int(dv * 1000)
+        zc_mv = int(zc * 1000)
+        self.SetInputCFD(channel, dv, zc)
+        dv = dv_mv / 1000 # convert the round-down in mv back to v
+        zc = zc_mv / 1000 # convert the round-down in mv back to v
+        return dv
 
     def _setInputChannelOffset(self, channel, offset):
         offset_ps = int(offset * 1e12)
