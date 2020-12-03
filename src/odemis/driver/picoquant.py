@@ -1270,6 +1270,7 @@ class HH400(model.Detector):
 
         for i, (dv, zc) in enumerate(zip(disc_volt, zero_cross)):
             self.SetInputCFD(i, int(dv * 1000), int(zc * 1000))
+            # TODO JN: Variable within Odemis
 
             self.inputChannelOffset = model.FloatContinuous(
                 0,
@@ -1292,6 +1293,7 @@ class HH400(model.Detector):
 
         if (sync_level != None) and (sync_zc != None):
             self.SetSyncCFD(int(sync_level * 1000), int(sync_zc * 1000))
+        # TODO JN: Variable within Odemis
 
         self.syncChannelOffset = model.FloatContinuous(
             0,

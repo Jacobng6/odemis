@@ -3946,6 +3946,18 @@ class Sparc2AlignTab(Tab):
                                                       main_data.time_correlator,
                                                       main_data.hw_settings_config["time-correlator"].get("syncDiv")
                                                       )
+                    if model.hasVA(main_data.time_correlator, "syncDiv"):
+                        speccnt_spe.add_setting_entry("syncDiv",
+                                                      main_data.time_correlator.syncDiv,
+                                                      main_data.time_correlator,
+                                                      main_data.hw_settings_config["time-correlator"].get("syncDiv")
+                                                      )
+                    if model.hasVA(main_data.time_correlator, "syncDiv"):
+                        speccnt_spe.add_setting_entry("syncDiv",
+                                                      main_data.time_correlator.syncDiv,
+                                                      main_data.time_correlator,
+                                                      main_data.hw_settings_config["time-correlator"].get("syncDiv")
+                                                      )
 
                 if main_data.tc_od_filter:
                     speccnt_spe.add_axis_entry("density", main_data.tc_od_filter)
