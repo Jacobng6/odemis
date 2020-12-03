@@ -1297,11 +1297,6 @@ class HH400(model.Detector):
         )
         self._setSyncDiv(self.syncDiv.value)
 
-<<<<<<< HEAD
-        if (sync_level != None) and (sync_zc != None):
-            self.SetSyncCFD(int(sync_level * 1000), int(sync_zc * 1000))
-        # TODO JN: Variable within Odemis
-=======
         if (sync_dv != None) and (sync_zc != None):
             self.syncChannelDisc = model.FloatContinuous(
                 sync_dv,
@@ -1311,7 +1306,6 @@ class HH400(model.Detector):
             )
             self._setSyncCFD(self.syncChannelDisc.value, sync_zc)
             # TODO JN
->>>>>>> 829b28a96526dd774d93da9bcde76eb05ae4b4d4
 
         self.syncChannelOffset = model.FloatContinuous(
             0,
