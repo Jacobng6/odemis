@@ -1276,7 +1276,6 @@ class HH400(model.Detector):
                 setter=self._setInputCFD,
             )
             self._setInputCFD(i, self.inputChannelDisc.value, zc)
-            # TODO JN
 
             self.inputChannelOffset = model.FloatContinuous(
                 0,
@@ -1305,7 +1304,6 @@ class HH400(model.Detector):
                 setter=self._setSyncCFD,
             )
             self._setSyncCFD(self.syncChannelDisc.value, sync_zc)
-            # TODO JN
 
         self.syncChannelOffset = model.FloatContinuous(
             0,
@@ -1905,7 +1903,6 @@ class HH400(model.Detector):
         return div
 
     def _setSyncCFD(self, sync_dv, sync_zc):
-        # TODO JN
         sync_dv_mv = int(sync_dv * 1000)
         sync_zc_mv = int(sync_zc * 1000)
         self.SetSyncCFD(sync_dv_mv, sync_zc_mv)
@@ -1922,7 +1919,6 @@ class HH400(model.Detector):
         return offset
 
     def _setInputCFD(self, channel, dv, zc):
-        # TODO JN
         dv_mv = int(dv * 1000)
         zc_mv = int(zc * 1000)
         self.SetInputCFD(channel, dv, zc)
