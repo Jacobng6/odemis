@@ -597,7 +597,7 @@ class LocalizationTab(Tab):
 
     @classmethod
     def get_display_priority(cls, main_data):
-        if main_data.role in ("cryo-secom"):
+        if main_data.role in ("cryo-secom",):
             return 2
         else:
             return None
@@ -1088,7 +1088,9 @@ class SecomStreamsTab(Tab):
     @classmethod
     def get_display_priority(cls, main_data):
         # For SECOM/DELPHI and all simple microscopes
-        if main_data.role in ("secom", "delphi", "sem", "optical"):
+        if main_data.role in ("cryo-secom",):
+            return None
+        elif main_data.role in ("secom", "delphi", "sem", "optical"):
             return 2
         else:
             return None
