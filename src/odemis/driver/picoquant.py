@@ -1924,7 +1924,7 @@ class HH400(model.Detector):
     def _setInputCFD(self, channel, dv, zc):
         dv_mv = int(dv * 1000)
         zc_mv = int(zc * 1000)
-        self.SetInputCFD(channel, dv, zc)
+        self.SetInputCFD(channel, dv_mv, zc_mv)
         dv = dv_mv / 1000 # convert the round-down in mv back to v
         zc = zc_mv / 1000 # convert the round-down in mv back to v
         return dv
