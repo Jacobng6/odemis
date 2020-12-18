@@ -1550,10 +1550,6 @@ class HH400(model.Detector):
         """
         assert HH_DISCRMIN <= level <= HH_DISCRMAX
         assert HH_ZCMIN <= zc <= HH_ZCMAX
-        logging.warning("JN")
-        logging.warning(channel)
-        logging.warning(level)
-        logging.warning(zc)
         self._dll.HH_SetInputCFD(self._idx, channel, level, zc)
 
     def SetInputChannelOffset(self, channel, value):
